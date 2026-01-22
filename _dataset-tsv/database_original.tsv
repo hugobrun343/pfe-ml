@@ -1,0 +1,69 @@
+Classe	Group name	Path	Genetic	Sex	Strain	Region 	Age (wk)	Sample Number 	Mechanics Passive	Mechanics Active	2-Photon	Pression (A)	Axial stretch (B)
+SAINS	Maturation	Maturation/AGE_P21	WT	F	C57	DTA	3	4	w Sae-Il		D/V	20, 50, 90	1, 2, 3
+SAINS	Maturation	Maturation/AGE_P42	WT	F	C57	DTA	6	4			D/V	40, 80, 120	1, 2, 3
+SAINS	Maturation	Maturation/AGE_P98	WT	F	C57	DTA	14	4			D/V	40, 80, 120	1, 2, 3
+SAINS	Maturation	Maturation/AGE_P230	WT	F	C57	DTA	33	5			D/V	40, 80, 120	1, 2, 3
+SAINS	Maturation	Maturation/AGE_P365	WT	F	C57	DTA	52	4			D/V	40, 80, 120	1, 2, 3
+SAINS	WT_A5A2	WT_A5A2/ATA	alpha5/alpha2	M	C57	ATA	9	6			D	40, 80, 120	1, 2, 3
+SAINS	WT_A5A2	WT_A5A2/DTA	alpha5/alpha2	M	C57	DTA	9	7			D	40, 80, 120	1, 2, 3
+MALADE	A5A2_mgR	A5A2_mgR/ATA	alpha5/alpha2, mgR	M	C57	ATA	9	3			D	40, 80, 120	1, 2, 3
+MALADE	A5A2_mgR	A5A2_mgR/DTA	alpha5/alpha2, mgR	M	C57	DTA	9	3			D	40, 80, 120	1, 2, 3
+MALADE	mgRmgR_A5A2	mgRmgR_A5A2/ATA	mgR	M	C57	ATA	9	3			D	40, 80, 120	1, 2, 3
+MALADE	mgRmgR_A5A2	mgRmgR_A5A2/DTA	mgR	M	C57	DTA	9	2			D		
+			mgR, Ltbp3_KO	M	C57	ATA	8	5			V		
+			cdh5, mgR	M	C57	ATA	6	4			V		
+			Fib5	M	C57	DTA	20	1	Dar data		D/V		
+			Fib5	M	C57	DTA	52	1	Dar data		D/V		
+SAINS	WT_ApoE	WT_ApoE/SAA	WT_ApoE	M	C57	SAA	14	4			D/V		
+MALADE	ApoE_Ang2_1wk	ApoE_Ang2_1wk/SAA	ApoE	M	C57	SAA	14	5			D/V		
+MALADE	ApoE_Ang2_2wk	ApoE_Ang2_2wk/SAA	ApoE	M	C57	SAA	14	3			D/V		
+SAINS	WT_ApoE	WT_ApoE/DTA	WT_ApoE	M	C57	DTA	14	2			D/V		
+MALADE	ApoE_Ang2_1wk	ApoE_Ang2_1wk/DTA	ApoE	M	C57	DTA	14	2			D/V		
+MALADE	ApoE_Ang2_2wk	ApoE_Ang2_2wk/DTA	ApoE	M	C57	DTA	14	3			D/V		
+SAIN	MMP12	MMP12/DTA	MMP12	M	C57	DTA	14	1	Bart data		V		
+			ApoE	M	C57	DTA	14		Bart data		V		
+MALADE	ApoE_ang2_18h	ApoE_ang2_18h/DTA	ApoE 	M	C57	DTA	14	4	Bart data		V		
+			ApoE	M	C57	DTA	14		Bart data		V		
+			MMP12, ApoE	M	C57	DTA	14		Bart data		V		
+MALADE	MMP12_ang2_18h	MMP12_ang2_18h/DTA	MMP12, ApoE	M	C57	DTA	14	4	Bart data		V		
+			MMP12, ApoE	M	C57	DTA	14		Bart data		V		
+SAIN	MMP12	MMP12/SAA	MMP12	M	C57	SAA	14	1	Bart data		V		
+			ApoE	M	C57	SAA	14		Bart data		V		
+MALADE	ApoE_ang2_18h	ApoE_ang2_18h/SAA	ApoE, Ang2	M	C57	SAA	14	4	Bart data		V		
+			ApoE, Ang2	M	C57	SAA	14		Bart data		V		
+			MMP12, ApoE	M	C57	SAA	14		Bart data		V		
+MALADE	MMP12_ang2_18h	MMP12_ang2_18h/SAA	MMP12, ApoE	M	C57	SAA	14	4	Bart data		V		
+			MMP12, ApoE	M	C57	SAA	14		Bart data		V		
+MALADE	C1039_WT_12NO	C1039_WT_12NO/ATA	C1039	M	C57	ATA	9	5	w Maria		V		
+MALADE	C1039_Het_12NO	C1039_Het_12NO/ATA	C1039	M	C57	ATA	9	8	w Maria		V		
+MALADE	C1039G	C1039G/ATA	C1039	M	C57	ATA	16	7	w Maria	w Maria	D/V		
+MALADE	C1039G_39wk	C1039G_39wk/ATA	C1039	M	C57	ATA	40	4	w Maria	w Maria	D/V		
+MALADE	C1039G_NOS2KO	C1039G_NOS2KO/ATA	C1039, NOS2_KO	M	C57	ATA	16	5	w Maria	w Maria	D/V		
+SAIN	WT_NOS2KO	WT_NOS2KO/ATA	WT, NOS2_KO	M	C57	ATA	16	6	w Maria	w Maria	D/V		
+MALADE	C1039G_NOS2Inhib	C1039G_NOS2Inhib/ATA	C1039	M	C57	ATA	16	5	w Maria	w Maria	D/V		
+MALADE	C1039G_NOS2Inhib_40wk	C1039G_NOS2Inhib_40wk/ATA	C1039	M	C57	ATA	40	3	w Maria	w Maria	D/V		
+MALADE	C1039G_Vers	C1039G_Vers/ATA	C1039, Versican_sh	M	C57	ATA	16	6	w Maria	w Maria	D/V		
+MALADE	C1039G_Aggr	C1039G_Aggr/ATA	C1039, Aggrecan_sh	M	C57	ATA	16	5	w Maria	w Maria	D/V		
+MALADE	C1039_WT_1Y	C1039_WT_1Y/ATA	C1039	M/F	C57	ATA	52	3	Dar data		D/V		
+MALADE	C1039_WT_2Y	C1039_WT_2Y/ATA	C1039	M/F	C57	ATA	104	6	Dar data		D/V		
+MALADE	C1039_Het_1Y	C1039_Het_1Y/ATA	C1039	M/F	C57	ATA	52	9	Dar data		D/V		
+MALADE	C1039_Het_2Y	C1039_Het_2Y/ATA	C1039	M/F	C57	ATA	104	5	Dar data		D/V		
+			WT	M/F	C57	ATA	8	3	Dar data w Cristina, Maria		D/V		
+			WT	M	C57	ATA	8	3	Dar data w Cristina, Maria		D/V		
+			WT	F	C57	ATA	8	3	Dar data w Cristina, Maria		D/V		
+			C1039	F	C57	ATA	8	5	Dar data w Cristina, Maria		D/V		
+			C1039	M/F	C57	ATA	8	3	Dar data w Cristina, Maria		D/V		
+			C1039	M	C57	ATA	8	3	Dar data w Cristina, Maria		D/V		
+			C1039	M	C57	ATA	12	6	Dar data w Cristina, Maria		D/V		
+MALADE	ELN_NOTCH3	Eln_Notch3/ELN_NOTCH3	WT	M	C57	IAA	14	7	Dar data		D		
+MALADE	HET_ELN	Eln_Notch3/HET_ELN	WT	M	C57	IAA	14	7	Dar data		D		
+SAIN	WT_ELN	Eln_Notch3/WT_ELN	WT	M	C57	IAA	14	4	Dar data		D		
+SAIN	Crosslink_80mmHg	Crosslink_80mmHg/DTA	WT	M	C57	DTA	12	3	Bart data		D/V		
+SAIN	Crosslink_120mmHg	Crosslink_120mmHg/DTA	WT	M	C57	DTA	12	4	Bart data		D/V		
+			Idua 	M	C57	ATA	12	5	Dar tested ATAs		D/V		
+			Idua 	M	C57	DTA	12	5			D/V		
+			Idua 	M	C57	ATA	24	5			D/V		
+			Idua 	M	C57	DTA	24	5			D/V		
+			Gusb	M	C57	ATA	12	5			D/V		
+			Gusb	M	C57	DTA	12	5			D/V		
+MALADE	ILT	ILT/IAA	ILT	M	C57	IAA	12	4					

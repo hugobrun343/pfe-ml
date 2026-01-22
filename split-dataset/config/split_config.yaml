@@ -47,12 +47,13 @@ split:
   test_size: 0.2
   
   # Random seed for reproducibility
-  random_seed: 80
+  random_seed: 123
   
   # Stratification keys (features to balance across train/test)
   stratify_by:
     - "Age (wk)"
     - "Sex"
+    - "Region"
     - "Axial stretch"
     - "Pressure"
     - "Classe"

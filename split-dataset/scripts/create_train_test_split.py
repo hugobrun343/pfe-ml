@@ -335,9 +335,16 @@ def save_summary(train_stats: Dict, test_stats: Dict, output_path: Path, config:
     lines.append("="*80)
     lines.append(f"Total samples: {train_stats['total']}")
     
-    for category in ['age', 'sex', 'orientation', 'genetic', 'classe']:
+    # Categories to display (including all stratification keys)
+    categories = ['age', 'sex', 'orientation', 'genetic', 'classe', 'region', 'axial_stretch', 'pressure']
+    
+    for category in categories:
         if train_stats[category]:
-            lines.append(f"\n{category.capitalize()} distribution:")
+            # Format category name for display
+            display_name = category.replace('_', ' ').title()
+            if category == 'axial_stretch':
+                display_name = 'Axial Stretch'
+            lines.append(f"\n{display_name} distribution:")
             total = train_stats['total']
             for value, count in sorted(train_stats[category].items(), key=lambda x: -x[1]):
                 percentage = (count / total) * 100
@@ -350,9 +357,13 @@ def save_summary(train_stats: Dict, test_stats: Dict, output_path: Path, config:
     lines.append("="*80)
     lines.append(f"Total samples: {test_stats['total']}")
     
-    for category in ['age', 'sex', 'orientation', 'genetic', 'classe']:
+    for category in categories:
         if test_stats[category]:
-            lines.append(f"\n{category.capitalize()} distribution:")
+            # Format category name for display
+            display_name = category.replace('_', ' ').title()
+            if category == 'axial_stretch':
+                display_name = 'Axial Stretch'
+            lines.append(f"\n{display_name} distribution:")
             total = test_stats['total']
             for value, count in sorted(test_stats[category].items(), key=lambda x: -x[1]):
                 percentage = (count / total) * 100
@@ -364,8 +375,12 @@ def save_summary(train_stats: Dict, test_stats: Dict, output_path: Path, config:
     lines.append("COMPARISON (Train vs Test)")
     lines.append("="*80)
     
-    for category in ['age', 'sex', 'orientation', 'genetic', 'classe']:
-        lines.append(f"\n{category.capitalize()}:")
+    for category in categories:
+        # Format category name for display
+        display_name = category.replace('_', ' ').title()
+        if category == 'axial_stretch':
+            display_name = 'Axial Stretch'
+        lines.append(f"\n{display_name}:")
         all_values = set(train_stats[category].keys()) | set(test_stats[category].keys())
         for value in sorted(all_values):
             train_pct = (train_stats[category][value] / train_stats['total'] * 100) if value in train_stats[category] else 0

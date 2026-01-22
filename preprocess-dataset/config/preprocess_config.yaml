@@ -1,0 +1,68 @@
+# Version identifier (e.g., v0, v1, v2)
+version: "v0"
+
+# Optional notes (will be saved in metadata.json)
+notes: "Version v0 - Preprocessing initial: Transformation des volumes 3D (1042×1042×[50-200]) en patches de 256×256×32. Extraction de 4×4=16 patches par volume. Sélection des 32 meilleures slices par méthode intensity (slices avec intensité maximale). Normalisation z-score (moyenne=0, std=1) appliquée patch par patch. Tous les volumes sont préprocessés sans séparation train/test (les splits sont appliqués lors du chargement des données pour l'entraînement)."
+
+paths:
+  dataset_json: "/mnt/pve/ds_shared/dataset_enriched_FINAL.json"
+  data_root: "/mnt/pve/ds_shared/data/raw"
+  output_dir: "/mnt/pve/ds_shared/data/preprocess"
+
+preprocessing:
+  # Target size: H × W × D
+  target_height: 256
+  target_width: 256
+  target_depth: 32
+  
+  # Patch extraction: n_h × n_w = total patches per volume
+  n_patches_h: 4
+  n_patches_w: 4
+  
+  # Slice selection configuration
+  # Method: 'intensity', 'variance', 'entropy', 'gradient'
+  slice_selection:
+    method: "intensity"
+  
+  # Normalization configuration
+  normalization:
+    # Méthode de normalisation: 'z-score', 'min-max', 'robust', 'percentile'
+    # - z-score: (x - mean) / std → moyenne=0, std=1
+    # - min-max: (x - min) / (max - min) → plage [0, 1]
+    # - robust: (x - median) / IQR → robuste aux outliers
+    # - percentile: normalise avec percentiles 1-99
+    method: "z-score"
+    
+    # Normalisation globale: si true, calcule min/max/mean/std sur TOUS les patches
+    # et utilise les mêmes statistiques pour normaliser tous les patches
+    # Si false: chaque patch est normalisé indépendamment avec ses propres stats
+    normalize_globally: true
+    
+    # ============================================================================
+    # CLIPPING ET REMAPPING (optionnel)
+    # ============================================================================
+    # Permet de garder une plage principale [clip_min, clip_max] et de gérer
+    # les valeurs en dehors de cette plage de deux façons:
+    
+    # Plage principale à conserver
+    clip_min: null  # Exemple: 500
+    clip_max: null  # Exemple: 1000
+    
+    # --- OPTION 1: Valeurs fixes (simple) ---
+    # Mettre toutes les valeurs hors plage à une valeur fixe
+    # below_clip_value: null  # Valeur pour < clip_min (ex: 0)
+    # above_clip_value: null  # Valeur pour > clip_max (ex: 1)
+    
+    # --- OPTION 2: Redimensionnement (avancé) ---
+    # Redimensionner les différentes plages dans des intervalles cibles
+    scale_below_range: null  # [min, max] pour redimensionner [min_patch, clip_min]
+                             # Exemple: [0, 0.1] → redimensionne [min_patch, 500] dans [0, 0.1]
+    scale_middle_range: null # [min, max] pour redimensionner [clip_min, clip_max]
+                             # Exemple: [0.1, 0.9] → redimensionne [500, 1000] dans [0.1, 0.9]
+    scale_above_range: null  # [min, max] pour redimensionner [clip_max, max_patch]
+                             # Exemple: [0.9, 1] → redimensionne [1000, max_patch] dans [0.9, 1]
+
+# Output: Each patch is saved as a separate .nii.gz file
+# Structure: output/preprocessed_{H}x{W}x{D}_{version}/patches/
+# Metadata: patches_info.json contains stack_id, label, position_i, position_j for each patch
+# Use train_test_split.json during data loading to filter patches by split

@@ -1,0 +1,201 @@
+TRAIN/TEST SPLIT SUMMARY
+================================================================================
+
+CONFIGURATION:
+
+Filters applied:
+  Age (wk): min=6, max=None
+
+Split configuration:
+  Test size: 20%
+  Random seed: 123
+  Stratification: Age (wk), Sex, Region, Axial stretch, Pressure, Classe, Orientation, Genetic
+
+================================================================================
+TRAIN SET STATISTICS
+================================================================================
+Total samples: 603
+
+Age distribution:
+  14                             :  278 ( 46.1%)
+  9                              :   90 ( 14.9%)
+  16                             :   54 (  9.0%)
+  52                             :   54 (  9.0%)
+  33                             :   40 (  6.6%)
+  12                             :   31 (  5.1%)
+  6                              :   24 (  4.0%)
+  104                            :   18 (  3.0%)
+  40                             :   14 (  2.3%)
+
+Sex distribution:
+  M                              :  435 ( 72.1%)
+  F                              :  128 ( 21.2%)
+  M/F                            :   40 (  6.6%)
+
+Orientation distribution:
+  D                              :  349 ( 57.9%)
+  V                              :  201 ( 33.3%)
+  null                           :   53 (  8.8%)
+
+Genetic distribution:
+  ApoE                           :  164 ( 27.2%)
+  WT                             :  159 ( 26.4%)
+  C1039                          :   92 ( 15.3%)
+  WT_ApoE                        :   63 ( 10.4%)
+  alpha5/alpha2                  :   32 (  5.3%)
+  alpha5/alpha2, mgR             :   26 (  4.3%)
+  mgR                            :   13 (  2.2%)
+  C1039, Versican_sh             :   10 (  1.7%)
+  WT, NOS2_KO                    :    9 (  1.5%)
+  C1039, Aggrecan_sh             :    8 (  1.3%)
+  C1039, NOS2_KO                 :    8 (  1.3%)
+  MMP12, ApoE                    :    7 (  1.2%)
+  MMP12                          :    6 (  1.0%)
+  ApoE                           :    3 (  0.5%)
+  ApoE, Ang2                     :    3 (  0.5%)
+
+Classe distribution:
+  MALADE                         :  334 ( 55.4%)
+  SAIN                           :  269 ( 44.6%)
+
+Region distribution:
+  DTA                            :  283 ( 46.9%)
+  ATA                            :  169 ( 28.0%)
+  SAA                            :  151 ( 25.0%)
+
+Axial Stretch distribution:
+  2                              :  459 ( 76.1%)
+  3                              :   75 ( 12.4%)
+  1                              :   69 ( 11.4%)
+
+Pressure distribution:
+  80                             :  319 ( 52.9%)
+  120                            :  178 ( 29.5%)
+  40                             :  104 ( 17.2%)
+  160                            :    2 (  0.3%)
+
+================================================================================
+TEST SET STATISTICS
+================================================================================
+Total samples: 138
+
+Age distribution:
+  14                             :   60 ( 43.5%)
+  9                              :   18 ( 13.0%)
+  52                             :   15 ( 10.9%)
+  16                             :   12 (  8.7%)
+  33                             :   10 (  7.2%)
+  12                             :    8 (  5.8%)
+  6                              :    6 (  4.3%)
+  40                             :    5 (  3.6%)
+  104                            :    4 (  2.9%)
+
+Sex distribution:
+  M                              :   95 ( 68.8%)
+  F                              :   32 ( 23.2%)
+  M/F                            :   11 (  8.0%)
+
+Orientation distribution:
+  D                              :   78 ( 56.5%)
+  V                              :   47 ( 34.1%)
+  null                           :   13 (  9.4%)
+
+Genetic distribution:
+  WT                             :   40 ( 29.0%)
+  ApoE                           :   39 ( 28.3%)
+  C1039                          :   24 ( 17.4%)
+  WT_ApoE                        :   10 (  7.2%)
+  alpha5/alpha2                  :    6 (  4.3%)
+  alpha5/alpha2, mgR             :    5 (  3.6%)
+  mgR                            :    3 (  2.2%)
+  C1039, Aggrecan_sh             :    2 (  1.4%)
+  C1039, NOS2_KO                 :    2 (  1.4%)
+  C1039, Versican_sh             :    2 (  1.4%)
+  WT, NOS2_KO                    :    2 (  1.4%)
+  ApoE                           :    1 (  0.7%)
+  ApoE, Ang2                     :    1 (  0.7%)
+  MMP12, ApoE                    :    1 (  0.7%)
+
+Classe distribution:
+  MALADE                         :   80 ( 58.0%)
+  SAIN                           :   58 ( 42.0%)
+
+Region distribution:
+  DTA                            :   70 ( 50.7%)
+  ATA                            :   36 ( 26.1%)
+  SAA                            :   32 ( 23.2%)
+
+Axial Stretch distribution:
+  2                              :  110 ( 79.7%)
+  1                              :   15 ( 10.9%)
+  3                              :   13 (  9.4%)
+
+Pressure distribution:
+  80                             :   70 ( 50.7%)
+  120                            :   42 ( 30.4%)
+  40                             :   24 ( 17.4%)
+  160                            :    2 (  1.4%)
+
+================================================================================
+COMPARISON (Train vs Test)
+================================================================================
+
+Age:
+  104                            : Train   3.0% | Test   2.9% | Diff   0.1%
+  12                             : Train   5.1% | Test   5.8% | Diff   0.7%
+  14                             : Train  46.1% | Test  43.5% | Diff   2.6%
+  16                             : Train   9.0% | Test   8.7% | Diff   0.3%
+  33                             : Train   6.6% | Test   7.2% | Diff   0.6%
+  40                             : Train   2.3% | Test   3.6% | Diff   1.3%
+  52                             : Train   9.0% | Test  10.9% | Diff   1.9%
+  6                              : Train   4.0% | Test   4.3% | Diff   0.4%
+  9                              : Train  14.9% | Test  13.0% | Diff   1.9%
+
+Sex:
+  F                              : Train  21.2% | Test  23.2% | Diff   2.0%
+  M                              : Train  72.1% | Test  68.8% | Diff   3.3%
+  M/F                            : Train   6.6% | Test   8.0% | Diff   1.3%
+
+Orientation:
+  D                              : Train  57.9% | Test  56.5% | Diff   1.4%
+  V                              : Train  33.3% | Test  34.1% | Diff   0.7%
+  null                           : Train   8.8% | Test   9.4% | Diff   0.6%
+
+Genetic:
+  ApoE                           : Train  27.2% | Test  28.3% | Diff   1.1%
+  ApoE                           : Train   0.5% | Test   0.7% | Diff   0.2%
+  ApoE, Ang2                     : Train   0.5% | Test   0.7% | Diff   0.2%
+  C1039                          : Train  15.3% | Test  17.4% | Diff   2.1%
+  C1039, Aggrecan_sh             : Train   1.3% | Test   1.4% | Diff   0.1%
+  C1039, NOS2_KO                 : Train   1.3% | Test   1.4% | Diff   0.1%
+  C1039, Versican_sh             : Train   1.7% | Test   1.4% | Diff   0.2%
+  MMP12                          : Train   1.0% | Test   0.0% | Diff   1.0%
+  MMP12, ApoE                    : Train   1.2% | Test   0.7% | Diff   0.4%
+  WT                             : Train  26.4% | Test  29.0% | Diff   2.6%
+  WT, NOS2_KO                    : Train   1.5% | Test   1.4% | Diff   0.0%
+  WT_ApoE                        : Train  10.4% | Test   7.2% | Diff   3.2%
+  alpha5/alpha2                  : Train   5.3% | Test   4.3% | Diff   1.0%
+  alpha5/alpha2, mgR             : Train   4.3% | Test   3.6% | Diff   0.7%
+  mgR                            : Train   2.2% | Test   2.2% | Diff   0.0%
+
+Classe:
+  MALADE                         : Train  55.4% | Test  58.0% | Diff   2.6%
+  SAIN                           : Train  44.6% | Test  42.0% | Diff   2.6%
+
+Region:
+  ATA                            : Train  28.0% | Test  26.1% | Diff   1.9%
+  DTA                            : Train  46.9% | Test  50.7% | Diff   3.8%
+  SAA                            : Train  25.0% | Test  23.2% | Diff   1.9%
+
+Axial Stretch:
+  1                              : Train  11.4% | Test  10.9% | Diff   0.6%
+  2                              : Train  76.1% | Test  79.7% | Diff   3.6%
+  3                              : Train  12.4% | Test   9.4% | Diff   3.0%
+
+Pressure:
+  120                            : Train  29.5% | Test  30.4% | Diff   0.9%
+  160                            : Train   0.3% | Test   1.4% | Diff   1.1%
+  40                             : Train  17.2% | Test  17.4% | Diff   0.1%
+  80                             : Train  52.9% | Test  50.7% | Diff   2.2%
+
+================================================================================
