@@ -1,0 +1,49 @@
+# ResNet3D-50 Training Configuration - Split 1 (run_full_dataset)
+
+# Data configuration
+data:
+  # Path to preprocessed directory (contains patches/ and patches_info.json)
+  preprocessed_dir: "/mnt/pve/ds_shared/data/preprocess/preprocessed_256x256x32"
+  # Path to train_test_split.json file
+  train_test_split_json: "/mnt/pve/work/work-hugo/split-dataset/output/run_full_dataset/train_test_split.json"
+
+# Model configuration
+model:
+  name: "ResNet3D-50"
+  in_channels: 3
+  num_classes: 1
+  initial_channels: 64
+
+# Input configuration
+input:
+  batch_size: 64
+  depth: 32
+  spatial_resolution: 256
+  channels: 3
+
+# Training configuration
+training:
+  epochs: 100
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  optimizer: "adam"
+  loss: "bce_with_logits"
+  num_workers: 16
+  pin_memory: true
+  prefetch_factor: 2
+  early_stopping_patience: null
+  early_stopping_min_delta: null
+
+# Data configuration
+data_config:
+  dtype: "float32"
+  normalized: true
+
+# System configuration
+system:
+  device: "cuda"
+  mixed_precision: false
+
+# Output configuration
+output:
+  save_dir: "checkpoints/resnet3d-50-full-dataset"

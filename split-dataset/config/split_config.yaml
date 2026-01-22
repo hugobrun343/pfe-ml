@@ -1,0 +1,78 @@
+# Configuration for train/test split creation
+# All fields are REQUIRED - use null to disable a filter
+
+# =============================================================================
+# FILTERING CRITERIA
+# =============================================================================
+# For each filter:
+#   - Single value: axial_stretch: 2
+#   - List of values: pressure: [80, 120]
+#   - Disabled: pressure: null (includes all values)
+
+filters:
+  # Age filtering (in weeks)
+  # Includes samples where: min <= age <= max
+  # Set to null to include all ages
+  age:
+    min: 6        # Minimum age (null = no minimum)
+    max: null       # Maximum age (null = no maximum)
+  
+  # Axial stretch value
+  axial_stretch: null              # Single value, list, or null
+  
+  # Pressure value (mmHg)
+  pressure: null                  # Single value, list, or null
+  
+  # Anatomical region
+  region: null                 # Single value, list, or null
+  
+  # Class filter
+  classe: null                  # Single value, list, or null
+  
+  # Genetic background
+  genetic: null                 # Single value, list, or null
+  
+  # Sex
+  sex: null                     # Single value, list, or null
+  
+  # Orientation (D=Dorsal, V=Ventral)
+  orientation: null             # Single value, list, or null
+
+# =============================================================================
+# SPLIT PARAMETERS
+# =============================================================================
+
+split:
+  # Test set proportion (0.2 = 20% test, 80% train)
+  test_size: 0.2
+  
+  # Random seed for reproducibility
+  random_seed: 80
+  
+  # Stratification keys (features to balance across train/test)
+  stratify_by:
+    - "Age (wk)"
+    - "Sex"
+    - "Axial stretch"
+    - "Pressure"
+    - "Classe"
+    - "Orientation"
+    - "Genetic"
+
+
+# =============================================================================
+# OUTPUT OPTIONS
+# =============================================================================
+
+output:
+  # Generate detailed summary file
+  generate_summary: true
+  
+  # Summary filename (relative to output directory)
+  summary_filename: "split_summary.txt"
+  
+  # Save full stack details (not just IDs)
+  save_full_details: false
+  
+  # Pretty print JSON
+  indent_json: 2

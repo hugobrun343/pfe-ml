@@ -1,0 +1,93 @@
+# Test Configuration - Quick validation avec tous les modèles
+
+# GPU
+gpu:
+  name: "L40S"
+  vram_gb: 48
+
+# Dataset
+dataset:
+  num_volumes: 67
+  data_path: "/mnt/pve/ds_shared/data"
+  dataset_enriched: "/mnt/pve/ds_shared/dataset_enriched_FINAL.json"
+  train_test_split: "/mnt/pve/ds_shared/train_test_split.json"
+
+# Test Parameters (2 valeurs chacun, tous les 24 modèles)
+grid_search:
+  # Spatial resolution (minimum 128 pour éviter les erreurs de downsampling)
+  spatial_resolutions: [64, 256]
+  
+  # Depth
+  depth_sizes: [32, 64]
+  
+  # Batch sizes
+  batch_sizes: [4, 64]
+  
+  # Tous les 24 modèles
+  models:
+    # ResNet3D (5)
+    - "ResNet3D-10"
+    - "ResNet3D-18"
+    - "ResNet3D-34"
+    - "ResNet3D-50"
+    - "ResNet3D-101"
+    
+    # EfficientNet3D (5)
+    - "EfficientNet3D-B0"
+    - "EfficientNet3D-B1"
+    - "EfficientNet3D-B2"
+    - "EfficientNet3D-B3"
+    - "EfficientNet3D-B4"
+    
+    # ViT3D (4)
+    - "ViT3D-Tiny"
+    - "ViT3D-Small"
+    - "ViT3D-Base"
+    - "ViT3D-Large"
+    
+    # ConvNeXt3D (5)
+    - "ConvNeXt3D-Tiny"
+    - "ConvNeXt3D-Small"
+    - "ConvNeXt3D-Base"
+    - "ConvNeXt3D-Large"
+    - "ConvNeXt3D-XLarge"
+    
+    # SE-ResNet3D (5)
+    - "SE-ResNet3D-18"
+    - "SE-ResNet3D-34"
+    - "SE-ResNet3D-50"
+    - "SE-ResNet3D-101"
+    - "SE-ResNet3D-152"
+
+# Output
+output:
+  results_dir: "results"
+  results_file: "test_results.json"
+  results_csv: "test_results.csv"
+  best_config_file: "test_best_config.yaml"
+  log_file: "test.log"
+
+# Simulation
+simulation:
+  use_synthetic_data: true
+  enable_backward_pass: true
+  num_warmup_iterations: 2
+  num_test_iterations: 3
+  clear_cache_between_tests: true
+
+# Safety
+safety:
+  vram_safety_margin_gb: 2
+  oom_retry_attempts: 0
+
+# Optimization
+optimization:
+  use_mixed_precision: true
+  mixed_precision_dtype: "float16"
+  use_gradient_checkpointing: false
+  compile_model: false
+
+# Environment
+environment:
+  python_version: "3.10"
+  conda_env: "py310"

@@ -1,0 +1,105 @@
+# Python
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+*.egg-info/
+dist/
+build/
+*.egg
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+.DS_Store
+
+# Model checkpoints and weights
+*.pth
+*.pt
+*.h5
+*.hdf5
+*.ckpt
+*.pkl
+*.pickle
+checkpoints/
+models/
+weights/
+saved_models/
+
+# Logs
+logs/
+*.log
+*.out
+
+# Data directories (preprocessed data, raw data, etc.)
+data/
+preprocessed/
+raw_data/
+*.nii.gz
+*.nii
+
+# Weights & Biases
+wandb/
+.wandb/
+
+# Jupyter Notebooks
+.ipynb_checkpoints/
+*.ipynb
+
+# Results and outputs
+results/
+output/
+*.csv
+*.json
+!**/config/*.json
+!**/config/*.yaml
+!**/config/*.yml
+
+# Temporary files
+*.tmp
+*.temp
+*.bak
+*.backup
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Specific project directories to ignore
+gpu-resnet-test/checkpoints/
+gpu-resnet-test/logs/
+gpu-resnet-test/wandb/
+gpu-tester/logs/
+gpu-tester/results/
+preprocess-dataset/logs/
+split-dataset/output/
+refacto-dataset/backups/
+refacto-dataset/data_final/
+refacto-dataset/data_intermediate/
+
+# Keep config files but ignore large data
+!gpu-resnet-test/config/
+!gpu-tester/config/
+!preprocess-dataset/config/
+!split-dataset/config/
+
+# Keep scripts
+!**/scripts/
+!**/*.sh
+!**/*.py
+
+# Keep README files
+!**/README.md
+!**/README.txt
