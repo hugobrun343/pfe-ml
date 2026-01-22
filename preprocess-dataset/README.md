@@ -1,91 +1,64 @@
-# Preprocessing
+# Preprocessing Scripts Structure
 
-Transforme les volumes 3D en patches sauvegardés en `.nii.gz`.
-
-## Pipeline
+## Organisation
 
 ```
-.nii.gz (1042×1042×[50-200]) → Découpe 8×8 → Sélection 32 slices → Resize 128×128×32 → .nii.gz
+scripts/
+├── preprocess_volumes_nii.py  # Script principal (point d'entrée)
+│
+├── core/                       # Fonctions fondamentales du preprocessing
+│   ├── io.py                  # Chargement/sauvegarde NIfTI
+│   ├── utils.py               # Extraction de patches, redimensionnement
+│   ├── slice_selection.py     # Sélection des meilleures slices
+│   └── normalization.py       # Normalisation et clipping
+│
+└── helpers/                    # Utilitaires et orchestration
+    ├── config_loader.py       # Chargement et validation de la config
+    ├── processing.py          # Fonctions de traitement (stats, filtrage)
+    ├── metadata.py            # Génération des métadonnées
+    └── display.py             # Affichage et logging
 ```
 
-## Usage
+## Utilisation
 
 ```bash
-python scripts/preprocess_volumes_nii.py --config config/preprocess_config_128.yaml
+python scripts/preprocess_volumes_nii.py --config config/preprocess_config.yaml
 ```
 
-## Output
+## Modules
 
-**Structure:**
-```
-output/preprocessed_{H}x{W}x{D}_{timestamp}/
-├── train/
-│   ├── stack_000001_patch_00_00.nii.gz
-│   ├── stack_000001_patch_00_01.nii.gz
-│   └── ...
-├── test/
-│   └── ...
-├── patches_info.json    # Métadonnées: split, stack_id, label, position_i, position_j
-└── metadata.json         # Config et statistiques
-```
+### Core (Fonctions fondamentales)
 
-**Format `patches_info.json`:**
-```json
-[
-  {
-    "filename": "stack_000001_patch_00_00.nii.gz",
-    "split": "train",
-    "stack_id": "stack_000001",
-    "label": 0,
-    "position_i": 0,
-    "position_j": 0
-  },
-  ...
-]
-```
+- **`io.py`** : Opérations I/O sur fichiers NIfTI
+  - `load_volume()` : Charger un volume .nii.gz
+  - `save_patch_nii()` : Sauvegarder un patch en .nii.gz
 
-**Exemple:** 52 volumes → 3,328 patches (52 × 64)
+- **`utils.py`** : Utilitaires de traitement
+  - `extract_patches()` : Extraire des patches en grille
+  - `resize_patch()` : Redimensionner un patch
 
-## Charger les données
+- **`slice_selection.py`** : Sélection de slices
+  - `select_best_slices()` : Sélectionner le meilleur bloc de slices
 
-```python
-from scripts.dataset_nii import NIIPatchDataset
-import torch
+- **`normalization.py`** : Normalisation
+  - `normalize_patch()` : Normaliser un patch
+  - `get_normalization_config()` : Extraire la config de normalisation
+  - `compute_stats_on_sample()` : Calculer les statistiques
 
-# Charger le dataset
-dataset = NIIPatchDatasetWithLabels(
-    patches_dir="output/preprocessed_128x128x32_*/train/",
-    patches_info_json="output/preprocessed_128x128x32_*/patches_info.json",
-    split="train"
-)
+### Helpers (Utilitaires)
 
-# DataLoader PyTorch (multiprocessing-safe)
-dataloader = torch.utils.data.DataLoader(
-    dataset, 
-    batch_size=32, 
-    num_workers=4,
-    shuffle=True
-)
+- **`config_loader.py`** : Gestion de la configuration
+  - `load_config()` : Charger et valider la config YAML
+  - `resolve_paths()` : Résoudre les chemins (absolus/relatifs)
+  - `get_slice_selection_method()` : Extraire la méthode de sélection
 
-# Utilisation
-for patch, label in dataloader:
-    # patch: (batch, C, D, H, W)
-    # label: (batch,)
-    pass
-```
+- **`processing.py`** : Fonctions de traitement
+  - `filter_valid_stacks()` : Filtrer les stacks valides
+  - `compute_global_normalization_stats()` : Stats globales
+  - `compute_sample_normalization_stats()` : Stats sur échantillon
 
-## Config
+- **`metadata.py`** : Génération de métadonnées
+  - `build_metadata()` : Construire le dictionnaire de métadonnées
 
-```yaml
-preprocessing:
-  target_height/width/depth: 128×128×32
-  n_patches_h/w: 8×8 = 64 patches
-  slice_selection: intensity, variance, entropy, gradient
-  normalization: z-score, min-max
-```
-
-## Dépendances
-
-```bash
-pip install numpy pyyaml scikit-image nibabel tqdm torch
-```
+- **`display.py`** : Affichage
+  - `print_config_summary()` : Afficher le résumé de la config

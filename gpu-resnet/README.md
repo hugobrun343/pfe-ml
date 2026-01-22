@@ -55,42 +55,12 @@ Edit `config/config.yaml` to configure:
 - **System**: `device`, `num_workers`, `prefetch_factor`
 - **Early stopping**: `early_stopping_patience`, `early_stopping_min_delta`
 
-## Loading Models and Optimizers from Checkpoints
+## Loading Models from Checkpoints
 
-You can easily load models and optimizers from checkpoints using factory functions:
-
-```python
-from scripts.helpers.artefacts import load_model_from_checkpoint, load_optimizer_from_checkpoint
-import torch
-
-# Load model automatically (extracts hyperparameters from checkpoint)
-device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-model = load_model_from_checkpoint(
-    Path('_runs/my_run_20260122_143052/checkpoints/best_model.pth'),
-    device=device
-)
-
-# Load optimizer for the model
-optimizer = load_optimizer_from_checkpoint(
-    Path('_runs/my_run_20260122_143052/checkpoints/best_model.pth'),
-    model=model
-)
-
-# Model and optimizer are ready to use!
-```
-
-You can also recreate a DataLoader from a config file:
-
-```python
-from scripts.helpers.artefacts import load_dataloader_from_config
-
-# Load DataLoader from config
-train_loader = load_dataloader_from_config(
-    Path('config/config.yaml'),
-    split='train',
-    batch_size=32  # Optional: override batch size
-)
-```
+Factory functions are available in `scripts/helpers/artefacts.py`:
+- `load_model_from_checkpoint()` - Load model with automatic hyperparameter extraction
+- `load_optimizer_from_checkpoint()` - Load optimizer with correct hyperparameters
+- `load_dataloader_from_config()` - Recreate DataLoader from config file
 
 ## Output Structure
 
