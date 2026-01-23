@@ -144,3 +144,47 @@ def plot_volume_analysis(volume_analysis: Dict[str, dict], output_dir: Path) -> 
     plt.tight_layout()
     plt.savefig(output_dir / 'volume_analysis.png', dpi=150, bbox_inches='tight')
     plt.close()
+
+
+def plot_patch_index_analysis(patch_index_analysis: Dict[int, dict], output_dir: Path) -> None:
+    """
+    Create bar chart of failure rates by patch index (for mode 'top_n').
+    
+    Args:
+        patch_index_analysis: Dictionary mapping patch_index -> stats
+        output_dir: Directory to save the plot
+    """
+    if not patch_index_analysis:
+        return
+    
+    # Sort by failure rate
+    sorted_indices = sorted(
+        patch_index_analysis.items(),
+        key=lambda x: (x[1]['failure_rate'], -x[1]['total']),
+        reverse=True
+    )
+    
+    # Take top 30 worst
+    top_n = min(30, len(sorted_indices))
+    top_indices = sorted_indices[:top_n]
+    
+    patch_indices = [f"Patch {idx}" for idx, _ in top_indices]
+    failure_rates = [stats['failure_rate'] for _, stats in top_indices]
+    totals = [stats['total'] for _, stats in top_indices]
+    
+    fig, ax = plt.subplots(figsize=(14, 8))
+    bars = ax.barh(patch_indices, failure_rates, color='coral')
+    ax.set_xlabel('Failure Rate', fontsize=12)
+    ax.set_ylabel('Patch Index', fontsize=12)
+    ax.set_title(f'Top {top_n} Worst Performing Patches (by index)', fontsize=14, fontweight='bold')
+    ax.set_xlim(0, 1)
+    
+    # Add count annotations
+    for i, (bar, total) in enumerate(zip(bars, totals)):
+        width = bar.get_width()
+        ax.text(width + 0.01, bar.get_y() + bar.get_height()/2,
+                f'n={total}', ha='left', va='center', fontsize=9)
+    
+    plt.tight_layout()
+    plt.savefig(output_dir / 'patch_index_analysis.png', dpi=150, bbox_inches='tight')
+    plt.close()

@@ -140,7 +140,7 @@ class Trainer:
         Validate model on validation set
         
         Returns:
-            Dictionary with 'loss', 'f1_class_0', 'f1_class_1', 'tp', 'fp', 'tn', 'fn', 'accuracy', 'precision', 'recall', 'predictions', 'labels', 'probs', 'indices', 'stack_ids', 'grid_positions'
+            Dictionary with 'loss', 'f1_class_0', 'f1_class_1', 'tp', 'fp', 'tn', 'fn', 'accuracy', 'precision', 'recall', 'predictions', 'labels', 'probs', 'indices', 'stack_ids', 'patch_positions'
         """
         self.model.eval()
         running_loss = 0.0
@@ -189,14 +189,18 @@ class Trainer:
         labels_tensor = torch.tensor(all_labels, dtype=torch.float32)
         metrics = compute_classification_metrics(predicted_tensor, labels_tensor)
         
-        # Get stack_ids and grid positions from dataset
+        # Get stack_ids and patch positions from dataset
         dataset = self.val_loader.dataset
         stack_ids = []
-        grid_positions = []
+        patch_positions = []
         for idx in all_indices:
             metadata = dataset.get_metadata(idx)
             stack_ids.append(metadata['stack_id'])
-            grid_positions.append((metadata['position_i'], metadata['position_j']))
+            patch_positions.append({
+                'position_h': metadata['position_h'],
+                'position_w': metadata['position_w'],
+                'patch_index': metadata.get('patch_index', None)
+            })
         
         return {
             'loss': running_loss / len(self.val_loader),
@@ -214,7 +218,7 @@ class Trainer:
             'probs': all_probs,
             'indices': all_indices,
             'stack_ids': stack_ids,
-            'grid_positions': grid_positions
+            'patch_positions': patch_positions
         }
     
     def train(self, num_epochs: int, start_epoch: int = 1) -> Dict[str, Any]:

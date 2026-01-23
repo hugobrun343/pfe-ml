@@ -53,12 +53,12 @@ def init_wandb_from_args(args: Namespace, model, save_dir: Path, project_name: s
         )
     else:
         print(f"  Creating new wandb run: {run_name}")
-        wandb.init(
-            project=project_name,
-            name=run_name,
-            config=config,
-            dir=str(save_dir)
-        )
+    wandb.init(
+        project=project_name,
+        name=run_name,
+        config=config,
+        dir=str(save_dir)
+    )
     
     # Upload config.yaml file to wandb if provided
     if config_path and config_path.exists():

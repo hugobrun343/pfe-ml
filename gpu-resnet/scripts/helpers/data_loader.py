@@ -99,23 +99,27 @@ def get_sample_metadata(
     indices: list
 ) -> Tuple[list, list]:
     """
-    Get stack_ids and grid positions for samples from dataset
+    Get stack_ids and patch positions for samples from dataset.
     
     Args:
         dataset: NIIPatchDataset instance
         indices: List of indices in the dataset
         
     Returns:
-        Tuple of (stack_ids, grid_positions) where:
+        Tuple of (stack_ids, patch_positions) where:
         - stack_ids: List of volume IDs for each sample
-        - grid_positions: List of (i, j) tuples for each sample's position in the grid
+        - patch_positions: List of dicts with 'position_h', 'position_w', 'patch_index'
     """
     stack_ids = []
-    grid_positions = []
+    patch_positions = []
     
     for idx in indices:
         metadata = dataset.get_metadata(idx)
         stack_ids.append(metadata['stack_id'])
-        grid_positions.append((metadata['position_i'], metadata['position_j']))
+        patch_positions.append({
+            'position_h': metadata['position_h'],
+            'position_w': metadata['position_w'],
+            'patch_index': metadata.get('patch_index', None)
+        })
     
-    return stack_ids, grid_positions
+    return stack_ids, patch_positions

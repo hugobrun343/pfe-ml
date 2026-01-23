@@ -6,15 +6,15 @@ from datetime import datetime
 from typing import Dict, Optional
 
 # Add scripts directory to path for local imports
-scripts_dir = Path(__file__).parent.parent
+scripts_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(scripts_dir))
-sys.path.insert(0, str(scripts_dir / "helpers"))
+sys.path.insert(0, str(scripts_dir / "preprocessing" / "helpers"))
 
 # Helper imports
-import helpers.config_loader
+import preprocessing.helpers.config_loader
 
 # Import functions
-get_slice_selection_method = helpers.config_loader.get_slice_selection_method
+get_slice_selection_method = preprocessing.helpers.config_loader.get_slice_selection_method
 
 
 def build_metadata(
@@ -28,7 +28,10 @@ def build_metadata(
     volume_count: int, 
     n_patches: int, 
     errors: int, 
-    norm_stats: Optional[Dict] = None
+    norm_stats: Optional[Dict] = None,
+    patch_mode: Optional[str] = None,
+    n_patches_config: Optional[int] = None,
+    scoring_method: Optional[str] = None
 ) -> Dict:
     """
     Build metadata dictionary for the preprocessing run.
@@ -49,8 +52,17 @@ def build_metadata(
     Returns:
         Metadata dictionary
     """
-    slice_method = get_slice_selection_method(cfg)
+    slice_method, _, _ = get_slice_selection_method(cfg)
     elapsed_min = elapsed_time / 60
+    
+    # Build patch extraction config for metadata
+    patch_extraction_metadata = {}
+    if patch_mode:
+        patch_extraction_metadata['mode'] = patch_mode
+        if patch_mode == 'top_n' and n_patches_config is not None:
+            patch_extraction_metadata['n_patches'] = n_patches_config
+            if scoring_method:
+                patch_extraction_metadata['scoring_method'] = scoring_method
     
     metadata = {
         'version': version,
@@ -60,8 +72,7 @@ def build_metadata(
             'target_height': cfg['target_height'],
             'target_width': cfg['target_width'],
             'target_depth': cfg['target_depth'],
-            'n_patches_h': cfg['n_patches_h'],
-            'n_patches_w': cfg['n_patches_w'],
+            'patch_extraction': patch_extraction_metadata,
             'n_patches_per_volume': n_patches,
             'slice_selection': {
                 'method': slice_method

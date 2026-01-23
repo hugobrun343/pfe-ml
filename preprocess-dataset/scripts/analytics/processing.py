@@ -9,10 +9,10 @@ from tqdm import tqdm
 # Add scripts directory to path for local imports
 scripts_dir = Path(__file__).parent.parent
 sys.path.insert(0, str(scripts_dir))
-sys.path.insert(0, str(scripts_dir / "core"))
+sys.path.insert(0, str(scripts_dir / "preprocessing" / "core"))
 
 # Import from core (same as preprocess_volumes_nii.py)
-import core.io as nii_io
+import preprocessing.core.io as nii_io
 load_volume = nii_io.load_volume
 
 

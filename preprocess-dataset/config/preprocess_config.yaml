@@ -15,14 +15,27 @@ preprocessing:
   target_width: 256
   target_depth: 32
   
-  # Patch extraction: n_h × n_w = total patches per volume
-  n_patches_h: 4
-  n_patches_w: 4
+  # Patch extraction configuration
+  #   - 'max': Extract maximum number of patches without overlap in a regular grid
+  #   - 'top_n': Extract N best patches based on scoring method
+  patch_extraction:
+    mode: "top_n"  # 'max' or 'top_n'
+    # Parameters for 'top_n' mode (only used if mode == 'top_n')
+    n_patches: 16  # Number of patches to extract
+    scoring_method: "intensity"  # 'intensity', 'variance', 'entropy', 'gradient'
   
   # Slice selection configuration
-  # Method: 'intensity', 'variance', 'entropy', 'gradient'
+  # Methods:
+  #   - 'intensity': Selects slices with highest total intensity (sum of all pixel values)
+  #   - 'variance': Selects slices with highest variance (most variation in pixel values)
+  #   - 'entropy': Selects slices with highest entropy (most information content)
+  #   - 'gradient': Selects slices with highest gradient magnitude (most spatial variation)
+  #   - 'intensity_range': Selects slices with most pixels in intensity range [min_intensity, max_intensity]
   slice_selection:
-    method: "intensity"
+    method: "intensity_range"
+    # Parameters for 'intensity_range' method (only used if method == 'intensity_range')
+    min_intensity: null  # Minimum intensity value (inclusive)
+    max_intensity: null  # Maximum intensity value (inclusive)
   
   # Normalization configuration
   normalization:

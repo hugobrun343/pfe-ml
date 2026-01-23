@@ -1,13 +1,15 @@
 """Modular slice selection functions for volume preprocessing."""
 
 import numpy as np
-from typing import Literal
+from typing import Literal, Optional
 
 
 def select_best_slices(
     vol: np.ndarray,
     n_slices: int,
-    method: Literal['intensity', 'variance', 'entropy', 'gradient'] = 'intensity'
+    method: Literal['intensity', 'variance', 'entropy', 'gradient', 'intensity_range'] = 'intensity',
+    min_intensity: Optional[float] = None,
+    max_intensity: Optional[float] = None
 ) -> np.ndarray:
     """
     Select best contiguous block of n_slices from volume.
@@ -15,7 +17,9 @@ def select_best_slices(
     Args:
         vol: Volume array (H, W, D, C)
         n_slices: Number of slices to select
-        method: Selection method ('intensity', 'variance', 'entropy', 'gradient')
+        method: Selection method ('intensity', 'variance', 'entropy', 'gradient', 'intensity_range')
+        min_intensity: Minimum intensity value for 'intensity_range' method
+        max_intensity: Maximum intensity value for 'intensity_range' method
         
     Returns:
         Selected volume block (H, W, n_slices, C)
@@ -35,7 +39,7 @@ def select_best_slices(
     # Evaluate each possible contiguous block
     for start in range(D - n_slices + 1):
         block = vol[:, :, start:start + n_slices, :]
-        score = _compute_block_score(block, method)
+        score = _compute_block_score(block, method, min_intensity, max_intensity)
         
         if score > best_score:
             best_score = score
@@ -44,13 +48,20 @@ def select_best_slices(
     return vol[:, :, best_start:best_start + n_slices, :]
 
 
-def _compute_block_score(block: np.ndarray, method: str) -> float:
+def _compute_block_score(
+    block: np.ndarray,
+    method: str,
+    min_intensity: Optional[float] = None,
+    max_intensity: Optional[float] = None
+) -> float:
     """
     Compute score for a block of slices.
     
     Args:
         block: Block array (H, W, D, C)
         method: Scoring method
+        min_intensity: Minimum intensity value for 'intensity_range' method
+        max_intensity: Maximum intensity value for 'intensity_range' method
         
     Returns:
         Score value
@@ -75,6 +86,13 @@ def _compute_block_score(block: np.ndarray, method: str) -> float:
         grad_h = np.abs(np.diff(block, axis=0)).sum()
         grad_w = np.abs(np.diff(block, axis=1)).sum()
         return float(grad_h + grad_w)
+        
+    elif method == 'intensity_range':
+        # Count pixels within intensity range [min_intensity, max_intensity]
+        if min_intensity is None or max_intensity is None:
+            raise ValueError("min_intensity and max_intensity must be provided for 'intensity_range' method")
+        mask = (block >= min_intensity) & (block <= max_intensity)
+        return float(np.sum(mask))
         
     else:
         raise ValueError(f"Unknown slice selection method: {method}")

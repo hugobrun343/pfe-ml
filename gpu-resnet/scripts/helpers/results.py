@@ -26,7 +26,9 @@ JSON Structure:
                     {
                         "sample_id": 0,
                         "stack_id": "volume_123",
-                        "grid_position": [0, 1],
+                        "position_h": 128,
+                        "position_w": 128,
+                        "patch_index": 0,
                         "true_label": 1,
                         "predicted_label": 1,
                         "probability": 0.8,
@@ -184,7 +186,7 @@ class ResultsTracker:
         Build detailed results for each validation sample
         
         Args:
-            val_metrics: Dict with 'predictions', 'labels', 'probs', 'stack_ids', 'grid_positions'
+            val_metrics: Dict with 'predictions', 'labels', 'probs', 'stack_ids', 'patch_positions'
             
         Returns:
             List of sample result dictionaries
@@ -197,7 +199,7 @@ class ResultsTracker:
         labels = val_metrics['labels']
         probs = val_metrics['probs']
         stack_ids = val_metrics.get('stack_ids', [])
-        grid_positions = val_metrics.get('grid_positions', [])
+        patch_positions = val_metrics.get('patch_positions', [])
         
         for i in range(len(predictions)):
             sample_dict = {
@@ -212,10 +214,13 @@ class ResultsTracker:
             if stack_ids and i < len(stack_ids):
                 sample_dict['stack_id'] = stack_ids[i]
             
-            # Add grid_position if available
-            if grid_positions and i < len(grid_positions):
-                i_pos, j_pos = grid_positions[i]
-                sample_dict['grid_position'] = [i_pos, j_pos]
+            # Add patch position information if available
+            if patch_positions and i < len(patch_positions):
+                pos_info = patch_positions[i]
+                sample_dict['position_h'] = pos_info['position_h']
+                sample_dict['position_w'] = pos_info['position_w']
+                if pos_info.get('patch_index') is not None:
+                    sample_dict['patch_index'] = pos_info['patch_index']
             
             samples.append(sample_dict)
         

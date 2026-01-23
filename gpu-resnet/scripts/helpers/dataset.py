@@ -87,10 +87,15 @@ class NIIPatchDataset(Dataset):
             
             self.patch_files.append(patch_file)
             self.patch_labels.append(patch_info['label'])
+            
+            if 'position_h' not in patch_info or 'position_w' not in patch_info:
+                raise ValueError(f"Patch info missing position_h or position_w: {patch_info.keys()}")
+            
             self.patch_metadata.append({
                 'stack_id': patch_info['stack_id'],
-                'position_i': patch_info['position_i'],
-                'position_j': patch_info['position_j']
+                'position_h': patch_info['position_h'],
+                'position_w': patch_info['position_w'],
+                'patch_index': patch_info.get('patch_index', None)
             })
         
         if len(self.patch_files) == 0:
@@ -149,12 +154,12 @@ class NIIPatchDataset(Dataset):
     
     def get_metadata(self, idx: int) -> dict:
         """
-        Get metadata for a patch (stack_id, position_i, position_j)
+        Get metadata for a patch.
         
         Args:
             idx: Index of item
             
         Returns:
-            Dictionary with 'stack_id', 'position_i', 'position_j'
+            Dictionary with 'stack_id', 'position_h', 'position_w', 'patch_index'
         """
         return self.patch_metadata[idx]

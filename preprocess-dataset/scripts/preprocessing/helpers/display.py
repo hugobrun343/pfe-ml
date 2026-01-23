@@ -5,15 +5,16 @@ from pathlib import Path
 from typing import Dict
 
 # Add scripts directory to path for local imports
-scripts_dir = Path(__file__).parent.parent
+scripts_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(scripts_dir))
-sys.path.insert(0, str(scripts_dir / "helpers"))
+sys.path.insert(0, str(scripts_dir / "preprocessing" / "helpers"))
 
 # Helper imports
-import helpers.config_loader
+import preprocessing.helpers.config_loader
 
 # Import functions
-get_slice_selection_method = helpers.config_loader.get_slice_selection_method
+get_slice_selection_method = preprocessing.helpers.config_loader.get_slice_selection_method
+get_patch_extraction_config = preprocessing.helpers.config_loader.get_patch_extraction_config
 
 
 def print_config_summary(cfg: Dict, norm_config: Dict, version: str) -> None:
@@ -28,10 +29,18 @@ def print_config_summary(cfg: Dict, norm_config: Dict, version: str) -> None:
     h = cfg['target_height']
     w = cfg['target_width']
     d = cfg['target_depth']
-    n_patches = cfg['n_patches_h'] * cfg['n_patches_w']
-    slice_method = get_slice_selection_method(cfg)
     
-    print(f"\nConfig: {h}x{w}x{d}, {cfg['n_patches_h']}x{cfg['n_patches_w']}={n_patches} patches/volume")
+    # Get patch extraction config
+    patch_mode, n_patches, scoring_method = get_patch_extraction_config(cfg)
+    slice_method, _, _ = get_slice_selection_method(cfg)
+    
+    # Format patch extraction info
+    if patch_mode == 'max':
+        patch_info = "max (all possible patches)"
+    else:  # top_n
+        patch_info = f"top_n ({n_patches} patches, scoring: {scoring_method})"
+    
+    print(f"\nConfig: {h}x{w}x{d}, patch extraction: {patch_info}")
     print(f"  Version: {version}")
     print(f"  Slice selection: {slice_method}")
     print(f"  Normalization: {norm_config['method']}")

@@ -75,7 +75,7 @@ def load_train_val_data(args: Namespace):
         num_workers=args.num_workers,
         pin_memory=True,
         prefetch_factor=args.prefetch_factor,
-        track_indices=True  # Track indices for validation to get stack_ids and grid_positions
+        track_indices=True  # Track indices for validation to get stack_ids and patch_positions
     )
     
     return train_loader, val_loader, val_sampler

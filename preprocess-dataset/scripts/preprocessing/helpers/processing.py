@@ -6,27 +6,28 @@ from tqdm import tqdm
 from typing import List, Dict
 
 # Add scripts directory to path for local imports
-scripts_dir = Path(__file__).parent.parent
+scripts_dir = Path(__file__).parent.parent.parent
 sys.path.insert(0, str(scripts_dir))
-sys.path.insert(0, str(scripts_dir / "core"))
-sys.path.insert(0, str(scripts_dir / "helpers"))
+sys.path.insert(0, str(scripts_dir / "preprocessing" / "core"))
+sys.path.insert(0, str(scripts_dir / "preprocessing" / "helpers"))
 
 # Core imports
-import core.io as nii_io
-import core.utils
-import core.slice_selection
-import core.normalization
+import preprocessing.core.io as nii_io
+import preprocessing.core.patch_extraction
+import preprocessing.core.slice_selection
+import preprocessing.core.normalization
 
 # Helper imports
-import helpers.config_loader
+import preprocessing.helpers.config_loader
 
 # Import functions
 load_volume = nii_io.load_volume
-extract_patches = core.utils.extract_patches
-resize_patch = core.utils.resize_patch
-select_best_slices = core.slice_selection.select_best_slices
-compute_stats_on_sample = core.normalization.compute_stats_on_sample
-get_slice_selection_method = helpers.config_loader.get_slice_selection_method
+extract_patches_max = preprocessing.core.patch_extraction.extract_patches_max
+extract_patches_top_n = preprocessing.core.patch_extraction.extract_patches_top_n
+select_best_slices = preprocessing.core.slice_selection.select_best_slices
+compute_stats_on_sample = preprocessing.core.normalization.compute_stats_on_sample
+get_slice_selection_method = preprocessing.helpers.config_loader.get_slice_selection_method
+get_patch_extraction_config = preprocessing.helpers.config_loader.get_patch_extraction_config
 
 
 def filter_valid_stacks(dataset: dict, data_root: Path) -> List[dict]:
@@ -75,18 +76,29 @@ def compute_global_normalization_stats(
     print("Computing GLOBAL normalization statistics on ALL patches...")
     all_patches = []
     
+    # Get patch extraction config
+    patch_mode, n_patches, scoring_method = get_patch_extraction_config(cfg)
+    target_h = cfg['target_height']
+    target_w = cfg['target_width']
+    
     for stack in tqdm(valid_stacks, desc="Loading patches for global stats"):
         try:
             nii_filename = Path(stack['nii_path']).name
             vol_path = data_root / nii_filename.replace('.nii', '.nii.gz')
             if vol_path.exists():
                 vol = load_volume(vol_path)
-                slice_method = get_slice_selection_method(cfg)
-                vol = select_best_slices(vol, cfg['target_depth'], slice_method)
-                patches = extract_patches(vol, cfg['n_patches_h'], cfg['n_patches_w'])
-                for patch in patches:
-                    patch = resize_patch(patch, cfg['target_height'], cfg['target_width'])
-                    all_patches.append(patch)
+                slice_method, min_intensity, max_intensity = get_slice_selection_method(cfg)
+                vol = select_best_slices(vol, cfg['target_depth'], slice_method, min_intensity, max_intensity)
+                
+                # Extract patches according to mode
+                if patch_mode == 'max':
+                    patches, _ = extract_patches_max(vol, target_h, target_w)
+                elif patch_mode == 'top_n':
+                    patches, _ = extract_patches_top_n(vol, n_patches, target_h, target_w, scoring_method)
+                else:
+                    raise ValueError(f"Unknown patch extraction mode: {patch_mode}")
+                
+                all_patches.extend(patches)
         except Exception:
             pass
     
@@ -119,18 +131,29 @@ def compute_sample_normalization_stats(
     print("Computing normalization statistics on sample...")
     sample_patches = []
     
+    # Get patch extraction config
+    patch_mode, n_patches, scoring_method = get_patch_extraction_config(cfg)
+    target_h = cfg['target_height']
+    target_w = cfg['target_width']
+    
     for stack in valid_stacks[:min(10, len(valid_stacks))]:
         try:
             nii_filename = Path(stack['nii_path']).name
             vol_path = data_root / nii_filename.replace('.nii', '.nii.gz')
             if vol_path.exists():
                 vol = load_volume(vol_path)
-                slice_method = get_slice_selection_method(cfg)
-                vol = select_best_slices(vol, cfg['target_depth'], slice_method)
-                patches = extract_patches(vol, cfg['n_patches_h'], cfg['n_patches_w'])
-                for patch in patches:
-                    patch = resize_patch(patch, cfg['target_height'], cfg['target_width'])
-                    sample_patches.append(patch)
+                slice_method, min_intensity, max_intensity = get_slice_selection_method(cfg)
+                vol = select_best_slices(vol, cfg['target_depth'], slice_method, min_intensity, max_intensity)
+                
+                # Extract patches according to mode
+                if patch_mode == 'max':
+                    patches, _ = extract_patches_max(vol, target_h, target_w)
+                elif patch_mode == 'top_n':
+                    patches, _ = extract_patches_top_n(vol, n_patches, target_h, target_w, scoring_method)
+                else:
+                    raise ValueError(f"Unknown patch extraction mode: {patch_mode}")
+                
+                sample_patches.extend(patches)
         except Exception:
             pass
     

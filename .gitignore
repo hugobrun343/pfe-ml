@@ -77,18 +77,6 @@ output/
 Thumbs.db
 desktop.ini
 
-# Specific project directories to ignore
-gpu-resnet-test/checkpoints/
-gpu-resnet-test/logs/
-gpu-resnet-test/wandb/
-gpu-tester/logs/
-gpu-tester/results/
-preprocess-dataset/logs/
-split-dataset/output/
-refacto-dataset/backups/
-refacto-dataset/data_final/
-refacto-dataset/data_intermediate/
-
 # Keep config files but ignore large data
 !gpu-resnet-test/config/
 !gpu-tester/config/

@@ -2,7 +2,7 @@
 
 import yaml
 from pathlib import Path
-from typing import Dict, Any
+from typing import Dict, Any, Optional, Tuple
 
 
 def load_config(config_path: Path) -> Dict[str, Any]:
@@ -72,17 +72,54 @@ def resolve_paths(config: Dict[str, Any], config_path: Path) -> Dict[str, Path]:
     return resolved
 
 
-def get_slice_selection_method(cfg: Dict[str, Any]) -> str:
+def get_slice_selection_method(cfg: Dict[str, Any]) -> tuple[str, Optional[float], Optional[float]]:
     """
-    Extract slice selection method from config (support both old and new format).
+    Extract slice selection method and parameters from config.
     
     Args:
         cfg: Preprocessing configuration dictionary
         
     Returns:
-        Slice selection method string
+        Tuple of (method, min_intensity, max_intensity)
     """
     slice_selection = cfg.get('slice_selection', 'intensity')
     if isinstance(slice_selection, dict):
-        return slice_selection.get('method', 'intensity')
-    return slice_selection
+        method = slice_selection.get('method', 'intensity')
+        min_intensity = slice_selection.get('min_intensity')
+        max_intensity = slice_selection.get('max_intensity')
+        return method, min_intensity, max_intensity
+    return slice_selection, None, None
+
+
+def get_patch_extraction_config(cfg: Dict[str, Any]) -> Tuple[str, Optional[int], Optional[str]]:
+    """
+    Extract patch extraction mode and parameters from config.
+    
+    Args:
+        cfg: Preprocessing configuration dictionary
+        
+    Returns:
+        Tuple of (mode, n_patches, scoring_method)
+        - mode: 'max' or 'top_n'
+        - n_patches: Number of patches (None for 'max' mode)
+        - scoring_method: Scoring method for 'top_n' mode (None for 'max' mode)
+        
+    Raises:
+        ValueError: If 'patch_extraction' section is missing or invalid
+    """
+    if 'patch_extraction' not in cfg:
+        raise ValueError("'patch_extraction' section is required in preprocessing configuration")
+    
+    patch_config = cfg['patch_extraction']
+    mode = patch_config.get('mode', 'max')
+    
+    if mode == 'max':
+        return 'max', None, None
+    elif mode == 'top_n':
+        n_patches = patch_config.get('n_patches')
+        scoring_method = patch_config.get('scoring_method', 'intensity')
+        if n_patches is None:
+            raise ValueError("'n_patches' is required when patch_extraction.mode == 'top_n'")
+        return 'top_n', n_patches, scoring_method
+    else:
+        raise ValueError(f"Unknown patch_extraction.mode: {mode}. Must be 'max' or 'top_n'")
