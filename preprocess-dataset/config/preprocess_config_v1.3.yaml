@@ -1,0 +1,31 @@
+# Version identifier
+version: "v1.3"
+
+# Optional notes
+notes: "MAX | intensity_range | min-max | clipping fixe"
+
+paths:
+  dataset_json: "/mnt/pve/ds_shared/dataset_enriched_FINAL.json"
+  data_root: "/mnt/pve/ds_shared/data/raw"
+  output_dir: "/mnt/pve/ds_shared/data/preprocess"
+
+preprocessing:
+  target_height: 256
+  target_width: 256
+  target_depth: 32
+  
+  patch_extraction:
+    mode: "max"
+  
+  slice_selection:
+    method: "intensity_range"
+    min_intensity: [300, 0, 300]
+    max_intensity: [1800, 1000, 2000]
+  
+  normalization:
+    method: "min-max"
+    clip_min: [300, 0, 300]
+    clip_max: [1800, 1000, 2000]
+    scale_below_range: [[0, 0], [0, 0], [0, 0]]
+    scale_middle_range: [[0, 1], [0, 1], [0, 1]]
+    scale_above_range: [[1, 1], [1, 1], [1, 1]]

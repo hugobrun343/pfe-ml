@@ -1,10 +1,10 @@
-# Format de Sortie : Patches .nii.gz
+# Output Format: .nii.gz Patches
 
-## Structure des fichiers
+## File structure
 
-Après le preprocessing, chaque patch est sauvegardé comme un fichier `.nii.gz` indépendant.
+After preprocessing, each patch is saved as a standalone `.nii.gz` file.
 
-### Organisation des dossiers
+### Directory layout
 
 ```
 output/preprocessed_{H}x{W}x{D}_{version}/
@@ -15,29 +15,29 @@ output/preprocessed_{H}x{W}x{D}_{version}/
 │   ├── stack_000001_patch_015.nii.gz
 │   ├── stack_000002_patch_000.nii.gz
 │   └── ...
-├── patches_info.json    # Métadonnées complètes (tous les patches)
-└── metadata.json         # Configuration et statistiques
+├── patches_info.json    # Full metadata (all patches)
+└── metadata.json         # Config and stats
 ```
 
-### Nommage des fichiers
+### File naming
 
-Format : `{stack_id}_patch_{patch_index:03d}.nii.gz`
+Format: `{stack_id}_patch_{patch_index:03d}.nii.gz`
 
-- `stack_id` : ID du volume d'origine (ex: `stack_000001`)
-- `patch_index` : Index séquentiel du patch (0, 1, 2, ...)
+- `stack_id`: source volume ID (e.g. `stack_000001`)
+- `patch_index`: sequential patch index (0, 1, 2, ...)
 
-**Exemples :**
-- `stack_000001_patch_000.nii.gz` → Premier patch du volume
-- `stack_000001_patch_015.nii.gz` → 16ème patch du volume (si 16 patches par volume)
-- `stack_000002_patch_000.nii.gz` → Premier patch du volume suivant
+**Examples:**
+- `stack_000001_patch_000.nii.gz` → first patch of the volume
+- `stack_000001_patch_015.nii.gz` → 16th patch (if 16 patches per volume)
+- `stack_000002_patch_000.nii.gz` → first patch of the next volume
 
-**Note :** L'ordre des patches dépend du mode d'extraction :
-- Mode `max` : Patches extraits en grille régulière (de gauche à droite, de haut en bas)
-- Mode `top_n` : Patches triés par score décroissant (du plus intéressant au moins intéressant)
+**Note:** Patch order depends on extraction mode:
+- Mode `max`: patches from a regular grid (left to right, top to bottom)
+- Mode `top_n`: patches sorted by decreasing score (most to least interesting)
 
-## Fichier `patches_info.json`
+## File `patches_info.json`
 
-Contient toutes les métadonnées pour chaque patch. **Note :** Ce fichier ne contient pas d'information de split (train/test) car tous les volumes sont préprocessés ensemble. Les splits sont définis dans `train_test_split.json` et appliqués lors du chargement des données.
+Contains metadata for every patch. **Note:** This file has no train/test split; all volumes are preprocessed together. Splits are defined in `train_test_split.json` and applied at load time.
 
 ### Structure
 
@@ -55,20 +55,20 @@ Contient toutes les métadonnées pour chaque patch. **Note :** Ce fichier ne co
 ]
 ```
 
-### Champs
+### Fields
 
-- **`filename`** : Nom du fichier `.nii.gz`
-- **`stack_id`** : ID du volume d'origine
-- **`label`** : `0` (SAIN) ou `1` (MALADE)
-- **`position_h`** : Position verticale du centre du patch dans le volume original (en pixels)
-- **`position_w`** : Position horizontale du centre du patch dans le volume original (en pixels)
-- **`patch_index`** : Index séquentiel du patch (0, 1, 2, ...)
+- **`filename`**: `.nii.gz` filename
+- **`stack_id`**: source volume ID
+- **`label`**: `0` (SAIN) or `1` (MALADE)
+- **`position_h`**: vertical center of the patch in the original volume (pixels)
+- **`position_w`**: horizontal center of the patch in the original volume (pixels)
+- **`patch_index`**: sequential patch index (0, 1, 2, ...)
 
-**Note :** Les positions `position_h` et `position_w` indiquent le centre du patch dans le volume original. Cela permet de savoir exactement d'où vient chaque patch, même en mode `top_n` où les patches ne sont pas en grille régulière.
+In `top_n` mode, **`position_d`** may also be present (depth center). Positions are patch centers in the original volume for traceability.
 
-## Fichier `metadata.json`
+## File `metadata.json`
 
-Contient la configuration complète, les statistiques et les informations de traitement du preprocessing.
+Holds full config, stats, and preprocessing info.
 
 ### Structure
 
@@ -111,25 +111,25 @@ Contient la configuration complète, les statistiques et les informations de tra
       "std": 1.0
     }
   },
-  "notes": "Description du preprocessing..."
+  "notes": "Preprocessing description..."
 }
 ```
 
-### Champs principaux
+### Main fields
 
-- **`version`** : Version du preprocessing (ex: "v0", "v1")
-- **`created`** : Date/heure de création (ISO format)
-- **`dataset_source`** : Chemin vers le dataset JSON source
-- **`config`** : Configuration complète (dimensions, méthodes, paramètres)
-  - **`patch_extraction`** : Configuration de l'extraction de patches
-    - **`mode`** : `"max"` ou `"top_n"`
-    - **`n_patches`** : (si mode `top_n`) Nombre de patches à extraire
-    - **`scoring_method`** : (si mode `top_n`) Méthode de scoring (`"intensity"`, `"variance"`, `"entropy"`, `"gradient"`)
-- **`processing`** : Informations de traitement (workers, temps)
-- **`stats`** : Statistiques (volumes, patches, erreurs, plages de valeurs)
-- **`notes`** : Notes descriptives du preprocessing
+- **`version`**: preprocessing version (e.g. "v0", "v1")
+- **`created`**: creation date/time (ISO)
+- **`dataset_source`**: path to source dataset JSON
+- **`config`**: full config (dimensions, methods, parameters)
+  - **`patch_extraction`**: patch extraction settings
+    - **`mode`**: `"max"` or `"top_n"`
+    - **`n_patches`**: (if `top_n`) number of patches
+    - **`scoring_method`**: (if `top_n`) `"intensity"`, `"variance"`, `"entropy"`, `"gradient"`
+- **`processing`**: runtime info (workers, time)
+- **`stats`**: volumes, patches, errors, value ranges
+- **`notes`**: free-form description
 
-**Exemple de config avec mode `top_n` :**
+**Example config for `top_n`:**
 ```json
 "patch_extraction": {
   "mode": "top_n",
@@ -138,33 +138,33 @@ Contient la configuration complète, les statistiques et les informations de tra
 }
 ```
 
-## Format des données dans les fichiers .nii.gz
+## Data format inside .nii.gz files
 
 ### Dimensions
 
-Chaque fichier `.nii.gz` contient un patch de dimensions :
-- **Spatial** : `H × W` (ex: 256×256)
-- **Profondeur** : `D` (ex: 32 slices)
-- **Canaux** : `3` (RGB)
+Each `.nii.gz` contains one patch with:
+- **Spatial**: `H × W` (e.g. 256×256)
+- **Depth**: `D` slices (e.g. 32)
+- **Channels**: `3` (RGB)
 
-Format NIfTI interne : `(D, H, W, 3)` = `(Z, Y, X, C)`
+Internal NIfTI layout: `(D, H, W, 3)` = `(Z, Y, X, C)`.
 
-### Type de données
+### Data type
 
-- **Type** : `float32`
-- **Normalisation** : Dépend de la config (z-score, min-max, robust, percentile)
-- **Mode** : Local (par patch) ou Global (même stats pour tous les patches)
-- **Clipping** : Optionnel (valeurs fixes ou redimensionnement de plages)
+- **Type**: `float32`
+- **Normalization**: depends on config (z-score, min-max, robust, percentile)
+- **Mode**: per-patch or global
+- **Clipping**: optional (fixed bounds or range remapping)
 
 ## Versioning
 
-Chaque preprocessing est identifié par une version (ex: `v0`, `v1`, `v2`). Cela permet de :
-- Gérer plusieurs versions de preprocessing avec différents paramètres
-- Traçabilité complète des expérimentations
-- Comparaison entre différentes approches
+Each run is identified by a version (e.g. `v0`, `v1`). This allows:
+- Managing several preprocessings with different settings
+- Full traceability
+- Comparing runs
 
-Le nom du dossier inclut la version : `preprocessed_{H}x{W}x{D}_{version}`
+The output directory name includes the version: `preprocessed_{H}x{W}x{D}_{version}`.
 
-## Utilisation avec PyTorch
+## Use with PyTorch
 
-Les patches sont chargés via `train_test_split.json` qui définit quels `stack_id` appartiennent au train/test. Le DataLoader filtre automatiquement les patches selon le split demandé.
+Patches are loaded according to `train_test_split.json`, which defines which `stack_id`s belong to train/test. The DataLoader filters patches by the requested split.

@@ -17,12 +17,12 @@ preprocessing:
   
   # Patch extraction configuration
   #   - 'max': Extract maximum number of patches without overlap in a regular grid
-  #   - 'top_n': Extract N best patches based on scoring method
+  #   - 'top_n': Extract N best patches based on average pooling score map
   patch_extraction:
     mode: "top_n"  # 'max' or 'top_n'
     # Parameters for 'top_n' mode (only used if mode == 'top_n')
     n_patches: 16  # Number of patches to extract
-    scoring_method: "intensity"  # 'intensity', 'variance', 'entropy', 'gradient'
+    pool_stride: 2  # Stride for average pooling (1, 2, or 3). Higher = faster but lower resolution
   
   # Slice selection configuration
   # Methods:
@@ -34,8 +34,10 @@ preprocessing:
   slice_selection:
     method: "intensity_range"
     # Parameters for 'intensity_range' method (only used if method == 'intensity_range')
-    min_intensity: null  # Minimum intensity value (inclusive)
-    max_intensity: null  # Maximum intensity value (inclusive)
+    # Can be a single value (applied to all channels) or a list of values (one per channel)
+    # Example: min_intensity: 500 or min_intensity: [500, 400, 300] for 3 channels
+    min_intensity: null  # Minimum intensity value (inclusive) - scalar or list
+    max_intensity: null  # Maximum intensity value (inclusive) - scalar or list
   
   # Normalization configuration
   normalization:
@@ -46,34 +48,23 @@ preprocessing:
     # - percentile: normalise avec percentiles 1-99
     method: "z-score"
     
-    # Normalisation globale: si true, calcule min/max/mean/std sur TOUS les patches
-    # et utilise les mêmes statistiques pour normaliser tous les patches
-    # Si false: chaque patch est normalisé indépendamment avec ses propres stats
-    normalize_globally: true
-    
     # ============================================================================
-    # CLIPPING ET REMAPPING (optionnel)
+    # CLIPPING ET REMAPPING
     # ============================================================================
-    # Permet de garder une plage principale [clip_min, clip_max] et de gérer
-    # les valeurs en dehors de cette plage de deux façons:
-    
+    # Clipping avec remapping des différentes plages dans des intervalles cibles
     # Plage principale à conserver
-    clip_min: null  # Exemple: 500
-    clip_max: null  # Exemple: 1000
+    # Can be a single value (applied to all channels) or a list of values (one per channel)
+    clip_min: null  # Exemple: 500 ou [500, 400, 300]
+    clip_max: null  # Exemple: 1000 ou [1000, 900, 800]
     
-    # --- OPTION 1: Valeurs fixes (simple) ---
-    # Mettre toutes les valeurs hors plage à une valeur fixe
-    # below_clip_value: null  # Valeur pour < clip_min (ex: 0)
-    # above_clip_value: null  # Valeur pour > clip_max (ex: 1)
-    
-    # --- OPTION 2: Redimensionnement (avancé) ---
-    # Redimensionner les différentes plages dans des intervalles cibles
+    # Redimensionnement des différentes plages dans des intervalles cibles
+    # Can be a single [min, max] (applied to all channels) or a list of [min, max] (one per channel)
     scale_below_range: null  # [min, max] pour redimensionner [min_patch, clip_min]
-                             # Exemple: [0, 0.1] → redimensionne [min_patch, 500] dans [0, 0.1]
+                             # Exemple: [0, 0.1] ou [[0, 0.1], [0, 0.05], [0, 0.15]]
     scale_middle_range: null # [min, max] pour redimensionner [clip_min, clip_max]
-                             # Exemple: [0.1, 0.9] → redimensionne [500, 1000] dans [0.1, 0.9]
+                             # Exemple: [0.1, 0.9] ou [[0.1, 0.9], [0.05, 0.95], [0.15, 0.85]]
     scale_above_range: null  # [min, max] pour redimensionner [clip_max, max_patch]
-                             # Exemple: [0.9, 1] → redimensionne [1000, max_patch] dans [0.9, 1]
+                             # Exemple: [0.9, 1] ou [[0.9, 1], [0.95, 1], [0.85, 1]]
 
 # Output: Each patch is saved as a separate .nii.gz file
 # Structure: output/preprocessed_{H}x{W}x{D}_{version}/patches/
