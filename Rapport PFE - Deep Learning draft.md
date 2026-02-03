@@ -18,7 +18,7 @@ Les prédictions pourront être **agrégées au niveau du stack** par moyenne de
 **Entraînement :**
 - Loss : BCEWithLogitsLoss
 - Optimiseur : Adam (lr 0,001, weight_decay 0,0001)
-- 100 epochs, batch 64, early stopping (patience 20, min_delta 0,0001)
+- 100 epochs, batch 64, early stopping (patience 20, min_delta 0,00001)
 - Meilleur modèle retenu selon le F1 de la classe MALADE sur l’ensemble de validation
 
 **Métriques :** F1 par classe, accuracy, precision, recall — à la fois au niveau patch et au niveau stack (après agrégation).
@@ -40,8 +40,8 @@ L’agrégation (moyenne des probabilités puis seuil 0,5) est calculée à chaq
 
 La démarche est organisée en trois phases successives.
 
-**Phase 1 — Évaluation du preprocessing (en cours)**  
-L’objectif est de fixer une stratégie de préparation des données avant de comparer les architectures. Plusieurs configurations (v1.1 à v1.10) ont été testées sur ResNet3D-50 avec différents splits. Les meilleures configurations (notamment v1.7 à v1.10) servent de base pour la suite.
+**Phase 1 — Évaluation du preprocessing **  
+L’objectif est de fixer une stratégie de préparation des données avant de comparer les architectures. Plusieurs configurations ont été testées sur ResNet3D-50 avec différents splits. Les meilleures configurations servent de base pour la suite.
 
 **Phase 2 — Comparaison d’architectures**  
 Une fois le preprocessing stabilisé, trois à quatre modèles alternatifs au ResNet3D-50 seront évalués sur les mêmes données. L’objectif est d’identifier l’architecture la plus adaptée au problème.
