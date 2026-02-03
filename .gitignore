@@ -12,3 +12,7 @@ __pycache__/
 *.pt
 *.ckpt
 checkpoints/
+
+# Weights & Biases
+wandb/
+.wandb/
