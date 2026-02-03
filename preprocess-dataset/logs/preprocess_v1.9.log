@@ -1,0 +1,14 @@
+
+Using 16 workers
+Config v1.9: 256x256x32 | patch=top_n | slice=intensity | norm=minmax_p1p99
+  top_n: n_patches=4, pool_stride=2
+
+Valid volumes: 771/771
+
+Output: /mnt/pve/ds_shared/data/preprocess/preprocessed_256x256x32_v1.9
+
+Done: 771/771 volumes, 3084 patches, 0 errors
+Time: 652.1s (10.9 min)
+Output: /mnt/pve/ds_shared/data/preprocess/preprocessed_256x256x32_v1.9
+
+[Check] OK: 3084 patches, sample checks passed.

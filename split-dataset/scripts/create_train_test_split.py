@@ -263,6 +263,7 @@ def save_split(train_stacks: List[Dict], test_stacks: List[Dict],
     split_config = config.get('split', {})
     output_config = config.get('output', {})
     
+    exclude = config.get('exclude_stacks') or []
     split_data = {
         "metadata": {
             "total_samples": len(train_stacks) + len(test_stacks),
@@ -271,6 +272,7 @@ def save_split(train_stacks: List[Dict], test_stacks: List[Dict],
             "train_ratio": len(train_stacks) / (len(train_stacks) + len(test_stacks)),
             "test_ratio": len(test_stacks) / (len(train_stacks) + len(test_stacks)),
             "filters_applied": filters,
+            "exclude_stacks": exclude,
             "stratification_keys": split_config.get('stratify_by', []),
             "random_seed": split_config.get('random_seed', 42)
         },
@@ -321,6 +323,10 @@ def save_summary(train_stats: Dict, test_stats: Dict, output_path: Path, config:
                 lines.append(f"  {key}: {', '.join(map(str, value))}")
             else:
                 lines.append(f"  {key}: {value}")
+    
+    exclude = config.get('exclude_stacks') or []
+    if exclude:
+        lines.append(f"  Exclude stacks: {', '.join(str(s) for s in exclude)}")
     
     lines.append("")
     lines.append("Split configuration:")
@@ -510,8 +516,19 @@ Configuration file (YAML) should contain:
     filtered_stacks = filter_stacks(dataset['stacks'], filters)
     print(f"  Filtered: {len(filtered_stacks)} stacks (from {len(dataset['stacks'])} total)")
     
+    # Exclude stacks by id
+    exclude = config.get('exclude_stacks') or []
+    exclude_set = {str(s).strip() for s in exclude if s}
+    if exclude_set:
+        before = len(filtered_stacks)
+        filtered_stacks = [s for s in filtered_stacks if s.get('id') not in exclude_set]
+        excluded = before - len(filtered_stacks)
+        print(f"  Excluded {excluded} stack(s): {', '.join(sorted(exclude_set))}")
+    else:
+        excluded = 0
+    
     if len(filtered_stacks) == 0:
-        print("\nERROR: No stacks match the filter criteria!")
+        print("\nERROR: No stacks left after filters and exclusions!")
         sys.exit(1)
     
     # Create stratified split

@@ -1,0 +1,86 @@
+{
+  "version": "v1.4",
+  "created": "2026-01-27T19:18:31.083165",
+  "dataset_source": "/mnt/pve/ds_shared/dataset_enriched_FINAL.json",
+  "config": {
+    "target_height": 256,
+    "target_width": 256,
+    "target_depth": 32,
+    "patch_extraction": {
+      "mode": "max"
+    },
+    "n_patches_per_volume": 16,
+    "slice_selection": {
+      "method": "variance"
+    },
+    "normalization": {
+      "method": "z-score",
+      "clip_min": [
+        300,
+        0,
+        300
+      ],
+      "clip_max": [
+        1800,
+        1000,
+        2000
+      ],
+      "scale_below_range": [
+        [
+          0,
+          0.1
+        ],
+        [
+          0,
+          0.1
+        ],
+        [
+          0,
+          0.1
+        ]
+      ],
+      "scale_middle_range": [
+        [
+          0.1,
+          0.9
+        ],
+        [
+          0.1,
+          0.9
+        ],
+        [
+          0.1,
+          0.9
+        ]
+      ],
+      "scale_above_range": [
+        [
+          0.9,
+          1
+        ],
+        [
+          0.9,
+          1
+        ],
+        [
+          0.9,
+          1
+        ]
+      ],
+      "percentile_low": 1,
+      "percentile_high": 99
+    }
+  },
+  "processing": {
+    "n_workers": 16,
+    "total_time_seconds": 1111.9638233184814,
+    "total_time_minutes": 18.532730388641358,
+    "avg_time_per_volume_seconds": 1.4422358279098333
+  },
+  "stats": {
+    "total_volumes": 771,
+    "total_patches": 12336,
+    "errors": 0
+  },
+  "notes": "MAX | variance | z-score | remapping"
+}

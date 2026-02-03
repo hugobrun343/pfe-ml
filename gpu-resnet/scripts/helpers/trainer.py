@@ -233,7 +233,10 @@ class Trainer:
             Dictionary with 'best_val_f1_class_1', 'total_epochs', 'early_stopped', 'final_val_metrics'
         """
         print(f"\nStarting training (epochs {start_epoch}-{num_epochs})...")
-        print(f"Early stopping: patience={self.early_stopping_patience}, min_delta={self.early_stopping_min_delta}")
+        if self.early_stopping_patience is not None:
+            print(f"Early stopping: patience={self.early_stopping_patience}, min_delta={self.early_stopping_min_delta}")
+        else:
+            print("Early stopping: disabled (train all epochs)")
         
         final_val_metrics = None  # Store final validation metrics
         

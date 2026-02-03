@@ -1,0 +1,25 @@
+# Version identifier
+version: "v1.8"
+
+# Optional notes
+notes: "MAX | intensity (classique) | minmax_p1p99 (p1/p99 per stack per channel). Stats in data/."
+
+paths:
+  dataset_json: "/mnt/pve/ds_shared/dataset_enriched_FINAL.json"
+  data_root: "/mnt/pve/ds_shared/data/raw"
+  output_dir: "/mnt/pve/ds_shared/data/preprocess"
+
+preprocessing:
+  target_height: 256
+  target_width: 256
+  target_depth: 32
+
+  patch_extraction:
+    mode: "max"
+
+  slice_selection:
+    method: "intensity"
+
+  normalization:
+    method: "minmax_p1p99"
+    data_dir: null

@@ -1,5 +1,6 @@
 """Configuration loading and argument parsing utilities."""
 
+import sys
 import yaml
 import argparse
 from pathlib import Path
@@ -31,76 +32,111 @@ def load_config(config_path: str) -> Dict:
 
 def parse_args(config: Dict) -> argparse.Namespace:
     """
-    Parse command line arguments, using config values as defaults.
+    Parse command line arguments. Only --config and --resume are CLI arguments.
+    All other parameters come strictly from config.yaml.
     
     Args:
         config: Configuration dictionary from YAML
         
     Returns:
-        Parsed arguments namespace with CLI overrides applied
+        Parsed arguments namespace with all values from config
         
     Raises:
-        ValueError: If required values are missing
+        ValueError: If required values are missing in config
     """
-    parser = argparse.ArgumentParser(description='Train ResNet3D for binary classification')
+    class _Parser(argparse.ArgumentParser):
+        def error(self, message):
+            self.print_usage(sys.stderr)
+            self.exit(2, f"Error: {message}\n"
+                         "Only --config and --resume are accepted on the command line. "
+                         "All other parameters (run_name, batch_size, etc.) must be set in the config file.\n")
+
+    parser = _Parser(
+        description='Train ResNet3D for binary classification.',
+        epilog='Only --config and --resume are accepted on the command line. '
+               'All other parameters (run_name, batch_size, num_workers, etc.) must be set in the config file.',
+    )
     
-    # Extract config sections
-    training = config.get('training', {})
-    model = config.get('model', {})
-    input_cfg = config.get('input', {})
-    system = config.get('system', {})
-    data_cfg = config.get('data', {})
-    
-    # Run name (required)
-    parser.add_argument('--run-name', type=str, required=True,
-                       help='Name for this training run (will create _runs/{run_name}/)')
-    
-    # Data paths (from YAML only, CLI can override)
-    default_preprocessed_dir = data_cfg.get('preprocessed_dir')
-    default_train_test_split_json = data_cfg.get('train_test_split_json')
-    parser.add_argument('--preprocessed-dir', type=str, default=default_preprocessed_dir,
-                       help='Path to preprocessed directory (contains patches/ and patches_info.json)')
-    parser.add_argument('--train-test-split-json', type=str, default=default_train_test_split_json,
-                       help='Path to train_test_split.json file')
-    
-    # Training parameters (from YAML only, CLI can override)
-    parser.add_argument('--batch-size', type=int, default=input_cfg.get('batch_size'),
-                       help='Batch size')
-    parser.add_argument('--epochs', type=int, default=training.get('epochs'),
-                       help='Number of epochs')
-    parser.add_argument('--lr', type=float, default=training.get('learning_rate'),
-                       help='Learning rate')
-    parser.add_argument('--weight-decay', type=float, default=training.get('weight_decay'),
-                       help='Weight decay')
-    parser.add_argument('--in-channels', type=int, default=model.get('in_channels'),
-                       help='Number of input channels')
-    
-    parser.add_argument('--device', type=str, default=system.get('device'),
-                       help='Device to use')
-    parser.add_argument('--num-workers', type=int, default=training.get('num_workers'),
-                       help='Number of data loader workers')
-    parser.add_argument('--prefetch-factor', type=int, default=training.get('prefetch_factor'),
-                       help='Number of batches each worker prefetches in advance')
-    
-    parser.add_argument('--early-stopping-patience', type=int,
-                       default=training.get('early_stopping_patience'),
-                       help='Number of epochs to wait before early stopping')
-    parser.add_argument('--early-stopping-min-delta', type=float,
-                       default=training.get('early_stopping_min_delta'),
-                       help='Minimum change to qualify as improvement')
-    
-    parser.add_argument('--resume', type=str, default=None,
-                       help='Path to checkpoint to resume from (e.g., _runs/{run_name}/checkpoints/latest_model.pth)')
-    
+    # Only CLI arguments accepted: config and resume
     parser.add_argument('--config', type=str, required=True,
-                       help='Path to configuration YAML file')
+                       help='Path to YAML config file (required)')
+    parser.add_argument('--resume', type=str, default=None,
+                       help='Chemin vers un checkpoint pour reprendre l’entraînement (optional)')
     
-    args = parser.parse_args()
+    # Parse only CLI args (config and resume)
+    cli_args = parser.parse_args()
     
-    # Validate that required values are present (from YAML or CLI)
+    # Support flat format (key: { value: x }) when sections are missing
+    def _flat_val(cfg: Dict, key: str):
+        v = cfg.get(key)
+        if isinstance(v, dict) and 'value' in v:
+            return v['value']
+        return v
+
+    if not config.get('training') and isinstance(config.get('batch_size'), dict) and 'value' in config.get('batch_size', {}):
+        training = {
+            'epochs': _flat_val(config, 'epochs'),
+            'learning_rate': _flat_val(config, 'learning_rate'),
+            'weight_decay': _flat_val(config, 'weight_decay'),
+            'num_workers': _flat_val(config, 'num_workers'),
+            'prefetch_factor': _flat_val(config, 'prefetch_factor'),
+            'early_stopping_patience': _flat_val(config, 'early_stopping_patience'),
+            'early_stopping_min_delta': _flat_val(config, 'early_stopping_min_delta'),
+        }
+        model = {'in_channels': _flat_val(config, 'in_channels')}
+        input_cfg = {'batch_size': _flat_val(config, 'batch_size')}
+        system = {'device': _flat_val(config, 'device')}
+        data_cfg = {
+            'preprocessed_dir': _flat_val(config, 'preprocessed_dir'),
+            'train_test_split_json': _flat_val(config, 'train_test_split_json'),
+        }
+        run_cfg = {'run_name': _flat_val(config, 'run_name') or 'resnet3d'}
+    else:
+        training = config.get('training', {})
+        model = config.get('model', {})
+        input_cfg = config.get('input', {})
+        system = config.get('system', {})
+        data_cfg = config.get('data', {})
+        run_cfg = config.get('run', {})
+    
+    # Build args namespace from config only (no CLI override)
+    args = argparse.Namespace()
+    
+    # CLI-only args
+    args.config = cli_args.config
+    args.resume = cli_args.resume
+    
+    # All other args come strictly from config
+    args.run_name = run_cfg.get('run_name')
+    args.preprocessed_dir = data_cfg.get('preprocessed_dir')
+    args.train_test_split_json = data_cfg.get('train_test_split_json')
+    args.batch_size = input_cfg.get('batch_size')
+    args.epochs = training.get('epochs')
+    args.lr = training.get('learning_rate')
+    args.weight_decay = training.get('weight_decay')
+    args.in_channels = model.get('in_channels')
+    args.device = system.get('device')
+    args.num_workers = training.get('num_workers')
+    args.prefetch_factor = training.get('prefetch_factor')
+    args.early_stopping_patience = training.get('early_stopping_patience')
+    args.early_stopping_min_delta = training.get('early_stopping_min_delta')
+    
+    # Validate that required values are present in config
+    if args.run_name is None:
+        raise ValueError("Run name must be specified in config.yaml (run.run_name)")
     if args.preprocessed_dir is None:
-        raise ValueError("Preprocessed directory must be specified in config.yaml (data.preprocessed_dir) or via --preprocessed-dir")
+        raise ValueError("Preprocessed directory must be specified in config.yaml (data.preprocessed_dir)")
     if args.train_test_split_json is None:
-        raise ValueError("Train/test split JSON must be specified in config.yaml (data.train_test_split_json) or via --train-test-split-json")
+        raise ValueError("Train/test split JSON must be specified in config.yaml (data.train_test_split_json)")
+    if args.batch_size is None:
+        raise ValueError("Batch size must be specified in config.yaml (input.batch_size)")
+    if args.epochs is None:
+        raise ValueError("Epochs must be specified in config.yaml (training.epochs)")
+    if args.lr is None:
+        raise ValueError("Learning rate must be specified in config.yaml (training.learning_rate)")
+    if args.num_workers is None:
+        raise ValueError("num_workers must be specified in config.yaml (training.num_workers)")
+    if args.device is None:
+        raise ValueError("Device must be specified in config.yaml (system.device)")
     
     return args

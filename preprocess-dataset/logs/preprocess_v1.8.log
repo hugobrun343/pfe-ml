@@ -1,0 +1,35 @@
+
+Using 16 workers
+Config v1.8: 256x256x32 | patch=max | slice=intensity | norm=minmax_p1p99
+
+Valid volumes: 771/771
+
+Output: /mnt/pve/ds_shared/data/preprocess/preprocessed_256x256x32_v1.8
+
+Done: 771/771 volumes, 12336 patches, 0 errors
+Time: 754.4s (12.6 min)
+Output: /mnt/pve/ds_shared/data/preprocess/preprocessed_256x256x32_v1.8
+
+[Check] Count mismatch: 11871 files, expected 12336. Sample checks passed.
+Volumes with missing patches:
+  stack_000090: 1 patches (missing 15)
+  stack_000133: 1 patches (missing 15)
+  stack_000134: 1 patches (missing 15)
+  stack_000135: 1 patches (missing 15)
+  stack_000136: 1 patches (missing 15)
+  stack_000137: 1 patches (missing 15)
+  stack_000138: 1 patches (missing 15)
+  stack_000139: 1 patches (missing 15)
+  stack_000140: 1 patches (missing 15)
+  stack_000141: 1 patches (missing 15)
+  stack_000142: 1 patches (missing 15)
+  stack_000143: 1 patches (missing 15)
+  stack_000144: 1 patches (missing 15)
+  stack_000145: 1 patches (missing 15)
+  stack_000146: 1 patches (missing 15)
+  stack_000147: 1 patches (missing 15)
+  stack_000157: 1 patches (missing 15)
+  stack_000158: 1 patches (missing 15)
+  stack_000159: 1 patches (missing 15)
+  stack_000160: 1 patches (missing 15)
+  ... and 11 more volumes with missing patches

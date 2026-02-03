@@ -2,6 +2,17 @@
 # All fields are REQUIRED - use null to disable a filter
 
 # =============================================================================
+# EXCLUDE STACKS (by stack id)
+# =============================================================================
+# Stack IDs to exclude from both train and test. Use null or [] for none.
+
+exclude_stacks:
+  - stack_000163
+  - stack_000147
+  - stack_000159
+  - stack_000090
+
+# =============================================================================
 # FILTERING CRITERIA
 # =============================================================================
 # For each filter:

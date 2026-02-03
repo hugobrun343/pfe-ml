@@ -15,6 +15,7 @@ from run.pipeline import process_all_volumes
 from results.display import print_config_summary, print_run_summary
 from results.write import write_run_results
 from check import run_post_check
+from stats import ensure_stats_for_normalization
 
 
 def main():
@@ -27,13 +28,13 @@ def main():
     config_path = Path(args.config).resolve()
     ctx = load_context(config_path)
     valid_stacks, total_stacks = load_valid_stacks(ctx["paths"])
+    n_workers = args.workers if args.workers is not None else mp.cpu_count()
+    print(f"\nUsing {n_workers} workers")
+    ensure_stats_for_normalization(ctx, valid_stacks, config_path, max_workers=n_workers)
     print_config_summary(ctx["cfg"], ctx["norm_config"], ctx["version"])
     print(f"\nValid volumes: {len(valid_stacks)}/{total_stacks}")
     output_base, patches_output = get_output_dirs(ctx)
     print(f"\nOutput: {output_base}")
-
-    n_workers = args.workers if args.workers is not None else mp.cpu_count()
-    print(f"\nUsing {n_workers} workers")
 
     patches_info, volume_count, errors, elapsed, n_ppv = process_all_volumes(ctx, valid_stacks, output_base, patches_output, n_workers)
 

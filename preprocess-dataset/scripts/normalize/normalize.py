@@ -1,7 +1,30 @@
 """Normalization logic (clip + scale)."""
 
 import numpy as np
-from typing import Optional, Union, Tuple
+from typing import Any, Dict, Optional, Union, Tuple
+
+
+def _apply_stats_lo_hi(
+    data: np.ndarray,
+    stats_record: Dict[str, Any],
+) -> np.ndarray:
+    """Clip to [lo, hi] per channel then (x - lo) / (hi - lo). Input patch or volume (H,W,D,C)."""
+    channels = stats_record.get("channels")
+    if not channels:
+        raise ValueError("stats_record must have 'channels'")
+    out = data.astype(np.float32)
+    C = out.shape[-1]
+    for ch in channels:
+        c = ch.get("channel")
+        if c is None or c >= C:
+            continue
+        lo = float(ch["lo"])
+        hi = float(ch["hi"])
+        if hi <= lo:
+            hi = lo + 1e-8
+        out[..., c] = np.clip(out[..., c], lo, hi)
+        out[..., c] = (out[..., c] - lo) / (hi - lo)
+    return out
 
 
 def normalize_patch(
@@ -12,10 +35,17 @@ def normalize_patch(
     scale_below_range: Optional[Union[Tuple[float, float], list]] = None,
     scale_above_range: Optional[Union[Tuple[float, float], list]] = None,
     scale_middle_range: Optional[Union[Tuple[float, float], list]] = None,
+    stats_record: Optional[Dict[str, Any]] = None,
 ) -> np.ndarray:
-    """Normalize a patch with various methods. Supports clipping and remapping."""
+    """Normalize patch or volume (H,W,D,C). stats_record required for intensity_global, minmax_p1p99, minmax_p5p95."""
     patch = patch.astype(np.float32)
     H, W, D, C = patch.shape
+
+    # intensity_global, minmax_p1p99, minmax_p5p95: use stats only, no clip/scale config
+    if method in ("intensity_global", "minmax_p1p99", "minmax_p5p95"):
+        if stats_record is None:
+            raise ValueError(f"method={method} requires stats_record")
+        return _apply_stats_lo_hi(patch, stats_record)
 
     def to_channel_array(value, name: str):
         if value is None:

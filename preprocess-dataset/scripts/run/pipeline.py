@@ -6,6 +6,18 @@ from pathlib import Path
 from tqdm import tqdm
 
 from run.volume import process_single_volume
+from stats import get_stats_record_for_stack
+
+
+def _stats_record_for_stack(context: dict, stack: dict):
+    """Resolve stats_record for a stack (global or per-stack). Returns None if not using stats-based norm."""
+    st = context.get("stats_type")
+    stats = context.get("stats")
+    if st is None or stats is None:
+        return None
+    if st == "global":
+        return stats
+    return get_stats_record_for_stack(stats, stack)
 
 
 def process_all_volumes(
@@ -23,10 +35,11 @@ def process_all_volumes(
     n_patches = context["n_patches"]
     pool_stride = context["pool_stride"]
 
-    process_args = [
-        (s, paths["data_root"], patches_output, cfg, norm_config, patch_mode, n_patches, pool_stride)
-        for s in valid_stacks
-    ]
+    process_args = []
+    for s in valid_stacks:
+        base = (s, paths["data_root"], patches_output, cfg, norm_config, patch_mode, n_patches, pool_stride)
+        rec = _stats_record_for_stack(context, s)
+        process_args.append((*base, rec))
     chunksize = max(1, len(process_args) // (n_workers * 4))
 
     start = time.time()

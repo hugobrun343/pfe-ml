@@ -11,7 +11,8 @@ from config.loader import get_slice_selection_method
 
 def process_single_volume(args_tuple) -> tuple:
     """Process one volume. Returns (patches_info_list, success, error_msg)."""
-    stack, data_root, patches_output, cfg, norm_config, patch_mode, n_patches, pool_stride = args_tuple
+    stack, data_root, patches_output, cfg, norm_config, patch_mode, n_patches, pool_stride = args_tuple[:8]
+    stats_record = args_tuple[8] if len(args_tuple) > 8 else None  # used only for intensity_global / minmax_p1p99 / minmax_p5p95
 
     stack_id = stack["id"]
     classe = stack.get("infos", {}).get("Classe", "")
@@ -31,15 +32,20 @@ def process_single_volume(args_tuple) -> tuple:
 
     try:
         vol = load_volume(vol_path)
-        vol = normalize_patch(
-            vol,
-            method=norm_config["method"],
-            clip_min=norm_config.get("clip_min"),
-            clip_max=norm_config.get("clip_max"),
-            scale_below_range=norm_config.get("scale_below_range"),
-            scale_above_range=norm_config.get("scale_above_range"),
-            scale_middle_range=norm_config.get("scale_middle_range"),
-        )
+        method = norm_config["method"]
+        if method in ("intensity_global", "minmax_p1p99", "minmax_p5p95") and stats_record is None:
+            return ([], False, f"No stats for stack {stack_id} (method={method})")
+        norm_kw = {
+            "method": method,
+            "clip_min": norm_config.get("clip_min"),
+            "clip_max": norm_config.get("clip_max"),
+            "scale_below_range": norm_config.get("scale_below_range"),
+            "scale_above_range": norm_config.get("scale_above_range"),
+            "scale_middle_range": norm_config.get("scale_middle_range"),
+        }
+        if stats_record is not None:
+            norm_kw["stats_record"] = stats_record
+        vol = normalize_patch(vol, **norm_kw)
 
         target_h, target_w, target_d = cfg["target_height"], cfg["target_width"], cfg["target_depth"]
         slice_method, min_intensity, max_intensity = get_slice_selection_method(cfg)

@@ -1,0 +1,50 @@
+
+Config: 256x256x32, patch extraction: top_n (8 patches, pool_stride: 2)
+  Version: v1.6
+  Slice selection: intensity_range
+  Normalization: robust
+    Clipping: [[300, 0, 300], [1800, 1000, 2000]], <[300, 0, 300] → [[0, 0], [0, 0], [0, 0]], >[1800, 1000, 2000] → [[1, 1], [1, 1], [1, 1]], middle → [[0, 1], [0, 1], [0, 1]]
+
+Valid volumes: 771/771
+
+Output: /mnt/pve/ds_shared/data/preprocess/preprocessed_256x256x32_v1.6
+
+Using 16 workers
+Error: Error on stack_000090: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000133: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000134: Could only find 6 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000135: Could only find 6 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000136: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000137: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000138: Could only find 6 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000139: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000140: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000141: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000142: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000143: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000144: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000145: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000146: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000147: Could only find 4 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000157: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000158: Could only find 4 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000159: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000160: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000161: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000162: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000163: Could only find 4 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000164: Could only find 4 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000165: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000166: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000167: Could only find 4 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000168: Could only find 4 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000169: Could only find 5 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000170: Could only find 4 non-overlapping 3D positions for 8 patches.
+Error: Error on stack_000171: Could only find 5 non-overlapping 3D positions for 8 patches.
+
+[740/771] Done | Time: 19.4 min | Errors: 31
+
+Done: /mnt/pve/ds_shared/data/preprocess/preprocessed_256x256x32_v1.6
+Total: 5,920 patches
+
+[Check] OK: 5920 patches, sample checks passed.

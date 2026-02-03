@@ -41,30 +41,43 @@ preprocessing:
   
   # Normalization configuration
   normalization:
-    # Méthode de normalisation: 'z-score', 'min-max', 'robust', 'percentile'
+    # -------------------------------------------------------------------------
+    # Méthodes "classiques" (sans stats externes). clip_min/max et scale_* utilisés si définis.
+    # -------------------------------------------------------------------------
     # - z-score: (x - mean) / std → moyenne=0, std=1
-    # - min-max: (x - min) / (max - min) → plage [0, 1]
+    # - min-max: (x - min) / (max - min) → plage [0, 1], min/max sur le volume
     # - robust: (x - median) / IQR → robuste aux outliers
-    # - percentile: normalise avec percentiles 1-99
+    # - percentile: percentiles 1–99 sur le volume → clip puis min-max [0, 1]
+    #
+    # -------------------------------------------------------------------------
+    # Méthodes "stats-based" (data/). clip_min, clip_max, scale_* sont IGNORÉS.
+    # Stats stockées dans data/ ; calculées au 1er run si absent, puis réutilisées.
+    # -------------------------------------------------------------------------
+    # - intensity_global: min/max GLOBAUX par canal (tous les stacks) → clip + min-max [0, 1]
+    #   Fichier: data/global_intensity.json
+    # - minmax_p1p99: p1/p99 par canal PAR STACK → clip + min-max [0, 1]
+    #   Fichier: data/stack_p1p99.json
+    # - minmax_p5p95: p5/p95 par canal PAR STACK → clip + min-max [0, 1]
+    #   Fichier: data/stack_p5p95.json
+    #
+    # data_dir: répertoire des stats. null = défaut <project>/data (créé si besoin).
+    #           Ignoré pour z-score, min-max, robust, percentile.
     method: "z-score"
+    data_dir: null
     
     # ============================================================================
-    # CLIPPING ET REMAPPING
+    # CLIPPING ET REMAPPING (ignorés si method = intensity_global | minmax_p1p99 | minmax_p5p95)
     # ============================================================================
-    # Clipping avec remapping des différentes plages dans des intervalles cibles
-    # Plage principale à conserver
-    # Can be a single value (applied to all channels) or a list of values (one per channel)
-    clip_min: null  # Exemple: 500 ou [500, 400, 300]
-    clip_max: null  # Exemple: 1000 ou [1000, 900, 800]
+    # Clipping avec remapping des différentes plages dans des intervalles cibles.
+    # Plage principale à conserver.
+    # Scalar ou liste par canal, ex: 500 ou [500, 400, 300]
+    clip_min: null
+    clip_max: null
     
-    # Redimensionnement des différentes plages dans des intervalles cibles
-    # Can be a single [min, max] (applied to all channels) or a list of [min, max] (one per channel)
-    scale_below_range: null  # [min, max] pour redimensionner [min_patch, clip_min]
-                             # Exemple: [0, 0.1] ou [[0, 0.1], [0, 0.05], [0, 0.15]]
-    scale_middle_range: null # [min, max] pour redimensionner [clip_min, clip_max]
-                             # Exemple: [0.1, 0.9] ou [[0.1, 0.9], [0.05, 0.95], [0.15, 0.85]]
-    scale_above_range: null  # [min, max] pour redimensionner [clip_max, max_patch]
-                             # Exemple: [0.9, 1] ou [[0.9, 1], [0.95, 1], [0.85, 1]]
+    # Redimensionnement des plages. [min, max] ou liste par canal.
+    scale_below_range: null   # [min_patch, clip_min] → cible
+    scale_middle_range: null  # [clip_min, clip_max] → cible (ex: [0, 1])
+    scale_above_range: null   # [clip_max, max_patch] → cible
 
 # Output: Each patch is saved as a separate .nii.gz file
 # Structure: output/preprocessed_{H}x{W}x{D}_{version}/patches/

@@ -64,7 +64,7 @@ def get_patch_extraction_config(cfg: Dict[str, Any]) -> Tuple[str, Optional[int]
 
 
 def get_normalization_config(cfg: Dict[str, Any]) -> Dict[str, Any]:
-    """Extract normalization configuration from main config."""
+    """Extract normalization config from preprocessing section (method, clip_*, scale_*, data_dir)."""
     norm_cfg = cfg.get("normalization", {})
     return {
         "method": norm_cfg.get("method", "z-score"),
@@ -75,6 +75,7 @@ def get_normalization_config(cfg: Dict[str, Any]) -> Dict[str, Any]:
         "scale_above_range": norm_cfg.get("scale_above_range"),
         "percentile_low": norm_cfg.get("percentile_low", 1),
         "percentile_high": norm_cfg.get("percentile_high", 99),
+        "data_dir": norm_cfg.get("data_dir"),
     }
 
 
