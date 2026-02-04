@@ -1,0 +1,62 @@
+{
+  "total_failures": 3967,
+  "oom_count": 62,
+  "skipped_count": 3901,
+  "failures_by_model": {
+    "ConvNeXt3D-Small": 270,
+    "ConvNeXt3D-Base": 270,
+    "ConvNeXt3D-Large": 270,
+    "ConvNeXt3D-XLarge": 270,
+    "SE-ResNet3D-18": 270,
+    "SE-ResNet3D-34": 270,
+    "SE-ResNet3D-50": 270,
+    "SE-ResNet3D-101": 270,
+    "SE-ResNet3D-152": 270,
+    "ConvNeXt3D-Tiny": 243,
+    "ViT3D-Large": 116,
+    "EfficientNet3D-B4": 115,
+    "ViT3D-Tiny": 115,
+    "ViT3D-Small": 115,
+    "ViT3D-Base": 115,
+    "EfficientNet3D-B3": 111,
+    "EfficientNet3D-B1": 101,
+    "EfficientNet3D-B2": 101,
+    "EfficientNet3D-B0": 89,
+    "ResNet3D-101": 78,
+    "ResNet3D-50": 70,
+    "ResNet3D-10": 56,
+    "ResNet3D-18": 56,
+    "ResNet3D-34": 56
+  },
+  "failures_by_batch": {
+    "64": 503,
+    "48": 490,
+    "32": 463,
+    "24": 454,
+    "20": 447,
+    "16": 433,
+    "12": 420,
+    "8": 393,
+    "4": 364
+  },
+  "failures_by_resolution": {
+    "1024": 1052,
+    "512": 912,
+    "256": 655,
+    "128": 475,
+    "64": 450,
+    "32": 423
+  },
+  "common_failing_configs": {
+    "('ConvNeXt3D-Base', 4, 32, 16)": 1,
+    "('ConvNeXt3D-Base', 4, 32, 24)": 1,
+    "('ConvNeXt3D-Base', 4, 32, 32)": 1,
+    "('ConvNeXt3D-Base', 4, 32, 48)": 1,
+    "('ConvNeXt3D-Base', 4, 32, 64)": 1,
+    "('ConvNeXt3D-Base', 4, 64, 16)": 1,
+    "('ConvNeXt3D-Base', 4, 64, 24)": 1,
+    "('ConvNeXt3D-Base', 4, 64, 32)": 1,
+    "('ConvNeXt3D-Base', 4, 64, 48)": 1,
+    "('ConvNeXt3D-Base', 4, 64, 64)": 1
+  }
+}

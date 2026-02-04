@@ -1,0 +1,40 @@
+{
+  "version": "v1.8",
+  "created": "2026-01-30T02:41:35.397689Z",
+  "dataset_source": "/mnt/pve/ds_shared/dataset_enriched_FINAL.json",
+  "config": {
+    "target_height": 256,
+    "target_width": 256,
+    "target_depth": 32,
+    "patch_extraction": {
+      "mode": "max"
+    },
+    "n_patches_per_volume": 16,
+    "slice_selection": {
+      "method": "intensity"
+    },
+    "normalization": {
+      "method": "minmax_p1p99",
+      "clip_min": null,
+      "clip_max": null,
+      "scale_below_range": null,
+      "scale_middle_range": null,
+      "scale_above_range": null,
+      "percentile_low": 1,
+      "percentile_high": 99,
+      "data_dir": null
+    }
+  },
+  "processing": {
+    "n_workers": 16,
+    "total_time_seconds": 754.39,
+    "total_time_minutes": 12.57,
+    "avg_time_per_volume_seconds": 0.98
+  },
+  "stats": {
+    "total_volumes": 771,
+    "total_patches": 12336,
+    "errors": 0
+  },
+  "notes": "MAX | intensity (classique) | minmax_p1p99 (p1/p99 per stack per channel). Stats in data/."
+}
