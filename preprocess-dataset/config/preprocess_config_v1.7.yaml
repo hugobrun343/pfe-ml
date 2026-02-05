@@ -2,7 +2,7 @@
 version: "v1.7"
 
 # Optional notes
-notes: "MAX | intensity (classique) | intensity_global (min/max per channel, all stacks). Stats in data/."
+notes: "MAX | intensity (classique) | intensity_global. Format NII classique."
 
 paths:
   dataset_json: "/mnt/pve/ds_shared/dataset_enriched_FINAL.json"
@@ -10,6 +10,8 @@ paths:
   output_dir: "/mnt/pve/ds_shared/data/preprocess"
 
 preprocessing:
+  output_format: "nii.gz"
+
   target_height: 256
   target_width: 256
   target_depth: 32
@@ -21,7 +23,5 @@ preprocessing:
     method: "intensity"
 
   normalization:
-    # intensity_global | minmax_p1p99 | minmax_p5p95 use data/ stats (compute if missing).
-    # data_dir: optional; default = <project>/data
     method: "intensity_global"
     data_dir: null

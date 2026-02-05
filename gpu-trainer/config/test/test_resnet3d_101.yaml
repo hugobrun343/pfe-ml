@@ -1,0 +1,28 @@
+# Test config - ResNet3D-101
+
+run:
+  run_name: test_resnet3d_101
+  group: test_v2
+
+data:
+  preprocessed_dir: /mnt/pve/ds_shared/data/preprocess/preprocessed_256x256x32_v2
+  train_test_split_json: /mnt/pve/work/work-hugo/_splits/full-dataset-v1.1-s42/train_test_split.json
+
+input:
+  batch_size: 48
+
+training:
+  epochs: 10
+  learning_rate: 0.001
+  weight_decay: 0.0001
+  num_workers: 12
+  prefetch_factor: 2
+  early_stopping_patience: 20
+  early_stopping_min_delta: 0.0001
+
+model:
+  name: resnet3d_101
+  in_channels: 3
+
+system:
+  device: cuda

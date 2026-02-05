@@ -10,6 +10,9 @@ paths:
   output_dir: "/mnt/pve/ds_shared/data/preprocess"
 
 preprocessing:
+  # Output format: 'nii.gz' or 'npy'
+  output_format: "nii.gz"
+
   # Target size: H × W × D
   target_height: 256
   target_width: 256

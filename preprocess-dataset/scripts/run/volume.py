@@ -3,7 +3,7 @@
 from pathlib import Path
 import numpy as np
 
-from ioutils.nii import load_volume, save_patch_nii
+from ioutils.nii import load_volume, save_patch_nii, save_patch_npy
 from normalize import normalize_patch
 from patches import extract_patches_max, extract_patches_top_n
 from config.loader import get_slice_selection_method
@@ -60,13 +60,19 @@ def process_single_volume(args_tuple) -> tuple:
         if not patches:
             return ([], False, f"No patches extracted from {stack_id}")
 
+        output_format = cfg.get("output_format", "nii.gz")
+        if output_format not in ("nii.gz", "npy"):
+            return ([], False, f"Invalid output_format: {output_format} (use 'nii.gz' or 'npy')")
+        ext = ".nii.gz" if output_format == "nii.gz" else ".npy"
+        save_fn = save_patch_nii if output_format == "nii.gz" else save_patch_npy
+
         patches_info_list = []
         for patch_idx, (patch, pos) in enumerate(zip(patches, positions)):
             try:
                 if patch.size == 0 or not np.isfinite(patch).all():
                     raise ValueError(f"Invalid patch at index {patch_idx}")
-                patch_filename = f"{stack_id}_patch_{patch_idx:03d}.nii.gz"
-                save_patch_nii(patch, patches_output / patch_filename)
+                patch_filename = f"{stack_id}_patch_{patch_idx:03d}{ext}"
+                save_fn(patch, patches_output / patch_filename)
                 info = {"filename": patch_filename, "stack_id": stack_id, "label": label, "patch_index": patch_idx}
                 if len(pos) == 3:
                     info["position_h"], info["position_w"], info["position_d"] = int(pos[0]), int(pos[1]), int(pos[2])

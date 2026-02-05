@@ -15,22 +15,25 @@ def run_validation(
     expected_patches_per_volume: int,
     sample_size: int = 20,
     expected_shape: Optional[Tuple[int, ...]] = None,
+    output_format: str = "nii.gz",
 ) -> Tuple[bool, str]:
     """
     Validate patches folder: count, empty files, per-volume counts, sample (shape, norm ~[0,1], finiteness).
     expected_shape: optional (H,W,D) or (H,W,D,C) for patch size, e.g. (256, 256, 32) or (256, 256, 32, 3).
+    output_format: 'nii.gz' or 'npy' - which files to look for.
     Returns (ok, message).
     """
     folder = Path(patches_dir)
     if not folder.exists():
         return False, f"Folder does not exist: {folder}"
 
-    files = sorted(folder.glob("*.nii.gz"))
+    pattern = "*.nii.gz" if output_format == "nii.gz" else "*.npy"
+    files = sorted(folder.glob(pattern))
     total = len(files)
     expected = expected_n_volumes * expected_patches_per_volume
 
     if total == 0:
-        return False, "No .nii.gz files found."
+        return False, f"No {pattern} files found."
 
     empty = [f.name for f in files if f.stat().st_size == 0]
     if empty:
@@ -60,13 +63,16 @@ def run_post_check(
     expected_n_volumes: int,
     expected_patches_per_volume: int,
     expected_shape: Optional[Tuple[int, ...]] = None,
+    output_format: str = "nii.gz",
 ) -> None:
     """
     Run run_validation, print the message, and exit(1) if validation fails.
     expected_shape: optional (H,W,D) or (H,W,D,C), e.g. (256, 256, 32, 3).
+    output_format: 'nii.gz' or 'npy'.
     """
     ok, msg = run_validation(
-        patches_dir, expected_n_volumes, expected_patches_per_volume, expected_shape=expected_shape
+        patches_dir, expected_n_volumes, expected_patches_per_volume,
+        expected_shape=expected_shape, output_format=output_format,
     )
     print(f"\n[Check] {msg}")
     if not ok:

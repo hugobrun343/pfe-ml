@@ -37,3 +37,15 @@ def save_patch_nii(patch: np.ndarray, output_path: Path, affine: np.ndarray = No
     nib.save(img, str(output_path))
     if not output_path.exists() or output_path.stat().st_size == 0:
         raise IOError(f"Failed to save patch: {output_path}")
+
+
+def save_patch_npy(patch: np.ndarray, output_path: Path) -> None:
+    """Save patch as .npy file (raw numpy array)."""
+    if patch.size == 0:
+        raise ValueError(f"Cannot save empty patch to {output_path}")
+    if not np.isfinite(patch).all():
+        raise ValueError(f"Patch contains non-finite values: {output_path}")
+    output_path.parent.mkdir(parents=True, exist_ok=True)
+    np.save(str(output_path), patch.astype(np.float32), allow_pickle=False)
+    if not output_path.exists() or output_path.stat().st_size == 0:
+        raise IOError(f"Failed to save patch: {output_path}")

@@ -44,7 +44,8 @@ def main():
     if args.check and volume_count > 0:
         cfg = ctx["cfg"]
         expected_shape = (cfg["target_height"], cfg["target_width"], cfg["target_depth"], 3)
-        run_post_check(patches_output, volume_count, n_ppv, expected_shape=expected_shape)
+        output_format = cfg.get("output_format", "nii.gz")
+        run_post_check(patches_output, volume_count, n_ppv, expected_shape=expected_shape, output_format=output_format)
 
 
 if __name__ == "__main__":
