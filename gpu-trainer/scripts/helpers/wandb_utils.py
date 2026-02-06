@@ -90,14 +90,15 @@ def log_epoch_metrics(epoch: int, epoch_time: float, train_metrics: Dict[str, fl
     Args:
         epoch: Current epoch number
         epoch_time: Time taken for epoch (seconds)
-        train_metrics: Dict with 'loss', 'f1_class_0', 'f1_class_1'
-        val_metrics: Dict with 'loss', 'f1_class_0', 'f1_class_1', 'tp', 'fp', 'tn', 'fn', 'accuracy', 'precision', 'recall' (optional)
+        train_metrics: Dict with 'loss', 'f1_class_0', 'f1_class_1', 'f1_macro'
+        val_metrics: Dict with 'loss', 'f1_class_0', 'f1_class_1', 'f1_macro', etc. (optional)
     """
     log_dict = {
         'epoch': epoch,
         'train/loss': train_metrics['loss'],
         'train/f1_class_0': train_metrics.get('f1_class_0', 0.0),
         'train/f1_class_1': train_metrics.get('f1_class_1', 0.0),
+        'train/f1_macro': train_metrics.get('f1_macro', 0.0),
         'epoch_time': epoch_time
     }
     
@@ -106,6 +107,7 @@ def log_epoch_metrics(epoch: int, epoch_time: float, train_metrics: Dict[str, fl
             'val/loss': val_metrics['loss'],
             'val/f1_class_0': val_metrics.get('f1_class_0', 0.0),
             'val/f1_class_1': val_metrics.get('f1_class_1', 0.0),
+            'val/f1_macro': val_metrics.get('f1_macro', 0.0),
             'val/accuracy': val_metrics['accuracy'],
             'val/precision': val_metrics['precision'],
             'val/recall': val_metrics['recall'],
@@ -123,11 +125,11 @@ def finalize_wandb(summary: Dict[str, Any], has_validation: bool = True):
     Finalize wandb run with summary metrics
     
     Args:
-        summary: Training summary dict with 'best_val_f1_class_1', 'total_epochs', 'early_stopped'
+        summary: Training summary dict with 'best_val_f1_macro', 'total_epochs', 'early_stopped'
         has_validation: Whether validation set was used
     """
-    if has_validation and 'best_val_f1_class_1' in summary:
-        wandb.run.summary['best_val_f1_class_1'] = summary['best_val_f1_class_1']
+    if has_validation and 'best_val_f1_macro' in summary:
+        wandb.run.summary['best_val_f1_macro'] = summary['best_val_f1_macro']
     wandb.run.summary['total_epochs'] = summary['total_epochs']
     wandb.run.summary['early_stopped'] = summary['early_stopped']
     wandb.finish()

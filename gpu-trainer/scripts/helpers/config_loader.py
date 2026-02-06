@@ -108,7 +108,7 @@ def parse_args(config: Dict) -> argparse.Namespace:
     
     # All other args come strictly from config
     args.run_name = run_cfg.get('run_name')
-    args.group = run_cfg.get('group')  # Optional wandb group
+    args.group = run_cfg.get('group')
     args.preprocessed_dir = data_cfg.get('preprocessed_dir')
     args.train_test_split_json = data_cfg.get('train_test_split_json')
     args.batch_size = input_cfg.get('batch_size')

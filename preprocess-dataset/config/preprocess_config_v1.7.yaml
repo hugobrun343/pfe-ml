@@ -2,7 +2,7 @@
 version: "v1.7"
 
 # Optional notes
-notes: "MAX | intensity (classique) | intensity_global. Format NII classique."
+notes: "MAX | intensity (classique) | intensity_global."
 
 paths:
   dataset_json: "/mnt/pve/ds_shared/dataset_enriched_FINAL.json"

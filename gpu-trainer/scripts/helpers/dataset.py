@@ -113,9 +113,7 @@ class NIIPatchDataset(Dataset):
     
     def __getitem__(self, idx: int) -> Tuple[torch.Tensor, torch.Tensor]:
         """
-        Get item from dataset - loads .nii.gz or .npy file on-demand
-        
-        Optimized loading: use mmap_mode for faster access and avoid unnecessary copies.
+        Get item from dataset - loads .nii.gz or .npy file on-demand.
 
         Args:
             idx: Index of item
@@ -161,6 +159,7 @@ class NIIPatchDataset(Dataset):
             
             if self.transform:
                 patch = self.transform(patch)
+            
             
             return patch, label
         except Exception as e:

@@ -12,21 +12,18 @@ sys.path.insert(0, str(project_root))
 sys.path.insert(0, str(scripts_dir))
 sys.path.insert(0, str(scripts_dir / "helpers"))
 
-from scripts.helpers.data_loader import create_dataloader
+from scripts.helpers.dataset import NIIPatchDataset
 
 
-def load_train_val_data(args: Namespace):
+def load_data(args: Namespace):
     """
-    Load training and validation data loaders from .nii.gz or .npy patches.
+    Load training and validation data as separate DataLoaders.
     
     Args:
-        args: Parsed command line arguments (must have preprocessed_dir and train_test_split_json)
-        
+        args: Parsed command line arguments
+    
     Returns:
-        Tuple of (train_loader, val_loader, val_sampler). val_loader may be None
-        
-    Raises:
-        FileNotFoundError: If required directories/files don't exist
+        Tuple of (train_loader, val_loader, train_dataset, val_dataset)
     """
     preprocessed_dir = Path(args.preprocessed_dir)
     if not preprocessed_dir.exists():
@@ -48,34 +45,51 @@ def load_train_val_data(args: Namespace):
     print(f"\nLoading data from: {preprocessed_dir}")
     print(f"  Train/test split: {train_test_split_json}")
     
-    # Create training data loader
-    print(f"  Loading training data...")
-    train_loader, _ = create_dataloader(
+    # Create datasets
+    train_dataset = NIIPatchDataset(
         patches_dir=str(patches_dir),
         patches_info_json=str(patches_info_json),
         train_test_split_json=str(train_test_split_json),
         split='train',
-        batch_size=args.batch_size,
-        shuffle=True,
-        num_workers=args.num_workers,
-        pin_memory=True,
-        prefetch_factor=args.prefetch_factor,
-        track_indices=False
+        transform=None
     )
     
-    # Create validation data loader
-    print(f"  Loading validation data...")
-    val_loader, val_sampler = create_dataloader(
+    val_dataset = NIIPatchDataset(
         patches_dir=str(patches_dir),
         patches_info_json=str(patches_info_json),
         train_test_split_json=str(train_test_split_json),
         split='test',
+        transform=None
+    )
+    
+    print(f"  Train samples: {len(train_dataset)}")
+    print(f"  Val samples: {len(val_dataset)}")
+    
+    # Train DataLoader - shuffle enabled
+    train_loader = DataLoader(
+        train_dataset,
+        batch_size=args.batch_size,
+        shuffle=True,
+        num_workers=args.num_workers,
+        pin_memory=True,
+        prefetch_factor=args.prefetch_factor if args.num_workers > 0 else None,
+        persistent_workers=args.num_workers > 0,
+        drop_last=False
+    )
+    
+    # Val DataLoader - no shuffle
+    val_loader = DataLoader(
+        val_dataset,
         batch_size=args.batch_size,
         shuffle=False,
         num_workers=args.num_workers,
         pin_memory=True,
-        prefetch_factor=args.prefetch_factor,
-        track_indices=True  # Track indices for validation to get stack_ids and patch_positions
+        prefetch_factor=args.prefetch_factor if args.num_workers > 0 else None,
+        persistent_workers=args.num_workers > 0,
+        drop_last=False
     )
     
-    return train_loader, val_loader, val_sampler
+    print(f"  Train batches: {len(train_loader)}")
+    print(f"  Val batches: {len(val_loader)}")
+    
+    return train_loader, val_loader, train_dataset, val_dataset

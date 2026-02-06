@@ -2,7 +2,7 @@
 version: "v3"
 
 # Optional notes
-notes: "MAX | intensity (classique) | minmax_p1p99 (p1/p99 per stack per channel). Format NII.GZ."
+notes: "MAX | intensity (classique) | minmax_p1p99 (p1/p99 per stack per channel). Format NII.GZ. Comme 1.8 mais en NPY."
 
 paths:
   dataset_json: "/mnt/pve/ds_shared/dataset_enriched_FINAL.json"

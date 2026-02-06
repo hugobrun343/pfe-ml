@@ -3,7 +3,7 @@
 JSON Structure:
 {
     "training_config": {...},
-    "best_val_f1_class_1": 0.85,
+    "best_val_f1_macro": 0.85,
     "total_epochs_completed": 15,
     "early_stopped": true,
     "epochs": [
@@ -310,12 +310,12 @@ class ResultsTracker:
         else:
             return {'volumes': [], 'volume_metrics': {}}
     
-    def save(self, best_val_f1_class_1: Optional[float] = None, total_epochs: int = 0, early_stopped: bool = False) -> Path:
+    def save(self, best_val_f1_macro: Optional[float] = None, total_epochs: int = 0, early_stopped: bool = False) -> Path:
         """
         Save results to JSON file (called after each epoch)
         
         Args:
-            best_val_f1_class_1: Best validation F1 score for class 1
+            best_val_f1_macro: Best validation F1 macro score
             total_epochs: Total number of epochs completed
             early_stopped: Whether training was early stopped
             
@@ -323,7 +323,7 @@ class ResultsTracker:
             Path to saved JSON file
         """
         self.results['training_config']['last_update'] = datetime.now().isoformat()
-        self.results['best_val_f1_class_1'] = float(best_val_f1_class_1) if best_val_f1_class_1 is not None else None
+        self.results['best_val_f1_macro'] = float(best_val_f1_macro) if best_val_f1_macro is not None else None
         self.results['total_epochs_completed'] = total_epochs
         self.results['early_stopped'] = early_stopped
         
@@ -400,12 +400,12 @@ class ResultsTracker:
         
         return plot_path
     
-    def finalize(self, best_val_f1_class_1: Optional[float] = None, total_epochs: int = 0, early_stopped: bool = False, analytics_dir: Optional[Path] = None) -> Path:
+    def finalize(self, best_val_f1_macro: Optional[float] = None, total_epochs: int = 0, early_stopped: bool = False, analytics_dir: Optional[Path] = None) -> Path:
         """
         Finalize results with end time, create plots and save (called at end of training)
         
         Args:
-            best_val_f1_class_1: Best validation F1 score for class 1
+            best_val_f1_macro: Best validation F1 macro score
             total_epochs: Total number of epochs completed
             early_stopped: Whether training was early stopped
             analytics_dir: Directory to save analytics (if None, uses save_dir)
@@ -414,7 +414,7 @@ class ResultsTracker:
             Path to saved JSON file
         """
         self.results['training_config']['end_time'] = datetime.now().isoformat()
-        json_path = self.save(best_val_f1_class_1, total_epochs, early_stopped)
+        json_path = self.save(best_val_f1_macro, total_epochs, early_stopped)
         
         # Create plots (save to results directory)
         plot_path = self.plot_metrics()

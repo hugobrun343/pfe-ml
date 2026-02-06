@@ -17,7 +17,7 @@ sys.path.insert(0, str(scripts_dir / "helpers"))
 # Local imports
 from scripts.helpers.config_loader import load_config, parse_args
 from scripts.helpers.run_setup import create_run_directories, copy_data_metadata, copy_config, get_runs_directory
-from scripts.helpers.data_loading import load_train_val_data
+from scripts.helpers.data_loading import load_data
 from scripts.helpers.model_setup import setup_model_and_optimizer
 from scripts.helpers.resume import resume_from_checkpoint
 from scripts.helpers.display import print_training_info, print_final_results
@@ -94,20 +94,20 @@ def main():
     device = torch.device(args.device if torch.cuda.is_available() else 'cpu')
     print_training_info(device, args.batch_size, args.epochs, args.lr)
     
-    # Load data
-    train_loader, val_loader, val_sampler = load_train_val_data(args)
+    # Load data (two DataLoaders with early val prefetching)
+    train_loader, val_loader, train_dataset, val_dataset = load_data(args)
     
     # Setup model and optimizer
     if resume_mode:
         # Resume: load everything from checkpoint (uses factories internally)
-        model, criterion, optimizer, start_epoch, best_val_f1_class_1, wandb_run_id = resume_from_checkpoint(
+        model, criterion, optimizer, start_epoch, best_val_f1_macro, wandb_run_id = resume_from_checkpoint(
             Path(args.resume), device
         )
     else:
         # New training: create from config
         model, criterion, optimizer = setup_model_and_optimizer(args, device)
         start_epoch = 1
-        best_val_f1_class_1 = 0.0
+        best_val_f1_macro = 0.0
         wandb_run_id = None
     
     # Prepare config dict for ResultsTracker
@@ -159,6 +159,8 @@ def main():
         model=model,
         train_loader=train_loader,
         val_loader=val_loader,
+        train_dataset=train_dataset,
+        val_dataset=val_dataset,
         criterion=criterion,
         optimizer=optimizer,
         device=device,
@@ -166,9 +168,10 @@ def main():
         early_stopping_patience=args.early_stopping_patience,
         early_stopping_min_delta=args.early_stopping_min_delta,
         results_tracker=results_tracker,
-        val_sampler=val_sampler,
-        best_val_f1_class_1=best_val_f1_class_1,
-        wandb_run_id=wandb_run_id
+        best_val_f1_macro=best_val_f1_macro,
+        wandb_run_id=wandb_run_id,
+        in_channels=args.in_channels,
+        num_classes=1
     )
     
     # Train
@@ -176,21 +179,18 @@ def main():
     
     # Finalize results
     json_path = results_tracker.finalize(
-        best_val_f1_class_1=summary['best_val_f1_class_1'] if val_loader else None,
+        best_val_f1_macro=summary['best_val_f1_macro'],
         total_epochs=summary['total_epochs'],
         early_stopped=summary['early_stopped'],
         analytics_dir=run_dirs['analytics']
     )
     
     # Finalize wandb
-    finalize_wandb(summary, has_validation=val_loader is not None)
+    finalize_wandb(summary, has_validation=True)
     
     # Display final results
     print("\nTraining completed!")
-    if val_loader:
-        print_final_results(summary, run_dirs['results'])
-    else:
-        print("No validation set used")
+    print_final_results(summary, run_dirs['results'])
     
     print(f"\nDetailed results saved to: {json_path}")
     print(f"\nRun directory: {run_dirs['run_dir']}")

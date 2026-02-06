@@ -28,7 +28,7 @@ def resume_from_checkpoint(resume_path: Path, device: torch.device) -> Tuple[tor
         device: Device to load checkpoint on
         
     Returns:
-        Tuple of (model, criterion, optimizer, start_epoch, best_val_f1_class_1, wandb_run_id)
+        Tuple of (model, criterion, optimizer, start_epoch, best_val_f1_macro, wandb_run_id)
         
     Raises:
         FileNotFoundError: If checkpoint doesn't exist
@@ -75,11 +75,11 @@ def resume_from_checkpoint(resume_path: Path, device: torch.device) -> Tuple[tor
     
     # Extract training state
     start_epoch = checkpoint['epoch'] + 1
-    best_val_f1_class_1 = checkpoint.get('val_f1_class_1', checkpoint.get('val_f1', 0.0))
+    best_val_f1_macro = checkpoint.get('best_val_f1_macro', checkpoint.get('best_val_f1_class_1', 0.0))
     wandb_run_id = checkpoint.get('wandb_run_id', None)
     
     print(f"  Resumed from epoch {checkpoint['epoch']}, continuing from epoch {start_epoch}")
     if wandb_run_id:
         print(f"  Wandb run ID: {wandb_run_id}")
     
-    return model, criterion, optimizer, start_epoch, best_val_f1_class_1, wandb_run_id
+    return model, criterion, optimizer, start_epoch, best_val_f1_macro, wandb_run_id

@@ -9,7 +9,7 @@ data:
   train_test_split_json: /mnt/pve/work/work-hugo/_splits/full-dataset-v1.1-s42/train_test_split.json
 
 input:
-  batch_size: 64
+  batch_size: 32
 
 training:
   epochs: 100
