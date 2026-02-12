@@ -18,7 +18,7 @@ training:
 model:
   name: resnet3d_50
 wandb:
-  project: gpu-lightning
+  project: resnet3d-binary-classification
   run_name: null
   group: train
 system:

@@ -106,6 +106,7 @@ def make_train_val_loaders(
     train_loader = DataLoader(
         train_set,
         batch_size=batch_size,
+        shuffle=True,
         num_workers=8,
         prefetch_factor=2,
         persistent_workers=True,
@@ -114,6 +115,7 @@ def make_train_val_loaders(
     val_loader = DataLoader(
         val_set,
         batch_size=batch_size,
+        shuffle=False,
         num_workers=8,
         prefetch_factor=2,
         persistent_workers=True,

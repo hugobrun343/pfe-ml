@@ -1,5 +1,5 @@
 run:
-  run_name: train_resnet3d_50_v2
+  run_name: train_resnet3d_50
   runs_root: /mnt/pve/work/work-hugo/_runs
 data:
   preprocessed_dir: /mnt/pve/ds_shared/data/preprocess/preprocessed_256x256x32_v2
@@ -18,7 +18,7 @@ training:
 model:
   name: resnet3d_50
 wandb:
-  project: gpu-lightning-train
+  project: resnet3d-binary-classification
   run_name: train_resnet3d_50
   group: train
 system:

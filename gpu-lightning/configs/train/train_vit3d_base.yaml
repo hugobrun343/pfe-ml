@@ -1,12 +1,12 @@
 run:
-  run_name: train_vit3d_base_v2
+  run_name: train_vit3d_base
   runs_root: /mnt/pve/work/work-hugo/_runs
 data:
   preprocessed_dir: /mnt/pve/ds_shared/data/preprocess/preprocessed_256x256x32_v2
   train_test_split_json: /mnt/pve/work/work-hugo/_splits/full-dataset-v1.1/train_test_split.json
   dataset_json: /mnt/pve/work/work-hugo/_dataset-json/dataset_final.json
 input:
-  batch_size: 64
+  batch_size: 4
 training:
   epochs: 100
   learning_rate: 0.001
@@ -18,7 +18,7 @@ training:
 model:
   name: vit3d_base
 wandb:
-  project: gpu-lightning-train
+  project: resnet3d-binary-classification
   run_name: train_vit3d_base
   group: train
 system:
