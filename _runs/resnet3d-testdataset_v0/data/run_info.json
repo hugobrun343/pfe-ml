@@ -1,8 +1,0 @@
-{
-  "run_name": "resnet3d-50-testdataset",
-  "version": "v0_legacy",
-  "preprocessing_version": "v0",
-  "description": "Legacy run migrated from old checkpoints structure. This run corresponds to preprocessing v0.",
-  "migration_date": "2026-01-22",
-  "original_location": "gpu-resnet/checkpoints/resnet3d-50-testdataset"
-}

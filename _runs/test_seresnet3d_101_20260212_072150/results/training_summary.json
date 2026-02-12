@@ -1,4 +1,0 @@
-{
-  "best_model_path": "/mnt/pve/work/work-hugo/_runs/test_seresnet3d_101_20260212_072150/checkpoints/best_model.pth",
-  "best_val_f1_mean": 0.9061732888221741
-}
