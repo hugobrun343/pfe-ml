@@ -1,0 +1,47 @@
+# Split config - DTA only, Orientation D, Male, Axial stretch 2, Pressure 80
+# Filtered subset for focused training
+
+# =============================================================================
+# EXCLUDE STACKS (by stack id)
+# =============================================================================
+exclude_stacks:
+  - stack_000163
+  - stack_000147
+  - stack_000159
+  - stack_000090
+
+# =============================================================================
+# FILTERING CRITERIA
+# =============================================================================
+filters:
+  age:
+    min: 6
+    max: null
+
+  axial_stretch: 2
+  pressure: 80
+  region: DTA
+  classe: null
+  genetic: null
+  sex: M
+  orientation: D
+
+# =============================================================================
+# SPLIT PARAMETERS
+# =============================================================================
+split:
+  test_size: 0.2
+  random_seed: 42
+  stratify_by:
+    - "Age (wk)"
+    - "Classe"
+    - "Genetic"
+
+# =============================================================================
+# OUTPUT OPTIONS
+# =============================================================================
+output:
+  generate_summary: true
+  summary_filename: "split_summary.txt"
+  save_full_details: false
+  indent_json: 2

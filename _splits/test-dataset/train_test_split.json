@@ -1,0 +1,72 @@
+{
+  "metadata": {
+    "total_samples": 34,
+    "train_samples": 26,
+    "test_samples": 8,
+    "train_ratio": 0.7647058823529411,
+    "test_ratio": 0.23529411764705882,
+    "filters_applied": {
+      "age": {
+        "min": 6,
+        "max": null
+      },
+      "axial_stretch": 2,
+      "pressure": 80,
+      "region": "DTA",
+      "classe": null,
+      "genetic": null,
+      "sex": "M",
+      "orientation": "D"
+    },
+    "exclude_stacks": [
+      "stack_000163",
+      "stack_000147",
+      "stack_000159",
+      "stack_000090"
+    ],
+    "stratification_keys": [
+      "Age (wk)",
+      "Classe",
+      "Genetic"
+    ],
+    "random_seed": 42
+  },
+  "train": [
+    "stack_000405",
+    "stack_000419",
+    "stack_000428",
+    "stack_000397",
+    "stack_000038",
+    "stack_000155",
+    "stack_000181",
+    "stack_000191",
+    "stack_000048",
+    "stack_000236",
+    "stack_000237",
+    "stack_000235",
+    "stack_000438",
+    "stack_000439",
+    "stack_000436",
+    "stack_000432",
+    "stack_000679",
+    "stack_000030",
+    "stack_000021",
+    "stack_000770",
+    "stack_000657",
+    "stack_000654",
+    "stack_000663",
+    "stack_000666",
+    "stack_000672",
+    "stack_000669"
+  ],
+  "test": [
+    "stack_000425",
+    "stack_000156",
+    "stack_000238",
+    "stack_000437",
+    "stack_000689",
+    "stack_000025",
+    "stack_000772",
+    "stack_000660"
+  ]
+}

@@ -1,0 +1,138 @@
+TRAIN/TEST SPLIT SUMMARY
+================================================================================
+
+CONFIGURATION:
+
+Filters applied:
+  Age (wk): min=6, max=None
+  axial_stretch: 2
+  pressure: 80
+  region: DTA
+  sex: M
+  orientation: D
+  Exclude stacks: stack_000163, stack_000147, stack_000159, stack_000090
+
+Split configuration:
+  Test size: 20%
+  Random seed: 42
+  Stratification: Age (wk), Classe, Genetic
+
+================================================================================
+TRAIN SET STATISTICS
+================================================================================
+Total samples: 26
+
+Age distribution:
+  14                             :   13 ( 50.0%)
+  9                              :    9 ( 34.6%)
+  12                             :    4 ( 15.4%)
+
+Sex distribution:
+  M                              :   26 (100.0%)
+
+Orientation distribution:
+  D                              :   26 (100.0%)
+
+Genetic distribution:
+  alpha5/alpha2                  :    6 ( 23.1%)
+  ApoE                           :    5 ( 19.2%)
+  WT                             :    4 ( 15.4%)
+  ApoE                           :    3 ( 11.5%)
+  MMP12, ApoE                    :    3 ( 11.5%)
+  alpha5/alpha2, mgR             :    2 (  7.7%)
+  MMP12                          :    1 (  3.8%)
+  WT_ApoE                        :    1 (  3.8%)
+  mgR                            :    1 (  3.8%)
+
+Classe distribution:
+  MALADE                         :   14 ( 53.8%)
+  SAIN                           :   12 ( 46.2%)
+
+Region distribution:
+  DTA                            :   26 (100.0%)
+
+Axial Stretch distribution:
+  2                              :   26 (100.0%)
+
+Pressure distribution:
+  80                             :   26 (100.0%)
+
+================================================================================
+TEST SET STATISTICS
+================================================================================
+Total samples: 8
+
+Age distribution:
+  14                             :    4 ( 50.0%)
+  9                              :    3 ( 37.5%)
+  12                             :    1 ( 12.5%)
+
+Sex distribution:
+  M                              :    8 (100.0%)
+
+Orientation distribution:
+  D                              :    8 (100.0%)
+
+Genetic distribution:
+  WT                             :    1 ( 12.5%)
+  ApoE                           :    1 ( 12.5%)
+  ApoE                           :    1 ( 12.5%)
+  MMP12, ApoE                    :    1 ( 12.5%)
+  WT_ApoE                        :    1 ( 12.5%)
+  alpha5/alpha2, mgR             :    1 ( 12.5%)
+  mgR                            :    1 ( 12.5%)
+  alpha5/alpha2                  :    1 ( 12.5%)
+
+Classe distribution:
+  MALADE                         :    5 ( 62.5%)
+  SAIN                           :    3 ( 37.5%)
+
+Region distribution:
+  DTA                            :    8 (100.0%)
+
+Axial Stretch distribution:
+  2                              :    8 (100.0%)
+
+Pressure distribution:
+  80                             :    8 (100.0%)
+
+================================================================================
+COMPARISON (Train vs Test)
+================================================================================
+
+Age:
+  12                             : Train  15.4% | Test  12.5% | Diff   2.9%
+  14                             : Train  50.0% | Test  50.0% | Diff   0.0%
+  9                              : Train  34.6% | Test  37.5% | Diff   2.9%
+
+Sex:
+  M                              : Train 100.0% | Test 100.0% | Diff   0.0%
+
+Orientation:
+  D                              : Train 100.0% | Test 100.0% | Diff   0.0%
+
+Genetic:
+  ApoE                           : Train  19.2% | Test  12.5% | Diff   6.7%
+  ApoE                           : Train  11.5% | Test  12.5% | Diff   1.0%
+  MMP12                          : Train   3.8% | Test   0.0% | Diff   3.8%
+  MMP12, ApoE                    : Train  11.5% | Test  12.5% | Diff   1.0%
+  WT                             : Train  15.4% | Test  12.5% | Diff   2.9%
+  WT_ApoE                        : Train   3.8% | Test  12.5% | Diff   8.7%
+  alpha5/alpha2                  : Train  23.1% | Test  12.5% | Diff  10.6%
+  alpha5/alpha2, mgR             : Train   7.7% | Test  12.5% | Diff   4.8%
+  mgR                            : Train   3.8% | Test  12.5% | Diff   8.7%
+
+Classe:
+  MALADE                         : Train  53.8% | Test  62.5% | Diff   8.7%
+  SAIN                           : Train  46.2% | Test  37.5% | Diff   8.7%
+
+Region:
+  DTA                            : Train 100.0% | Test 100.0% | Diff   0.0%
+
+Axial Stretch:
+  2                              : Train 100.0% | Test 100.0% | Diff   0.0%
+
+Pressure:
+  80                             : Train 100.0% | Test 100.0% | Diff   0.0%
+
+================================================================================

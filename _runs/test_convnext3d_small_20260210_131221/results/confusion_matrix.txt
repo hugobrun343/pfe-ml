@@ -1,0 +1,13 @@
+==================================================
+FINAL VALIDATION RESULTS
+==================================================
+
+Confusion Matrix:
+                  Predicted 0     Predicted 1    
+  Actual 0        194             38             
+  Actual 1        71              217            
+
+F1 Scores:
+  Class 0 (Negative): 0.7807
+  Class 1 (Positive): 0.7993
+==================================================
