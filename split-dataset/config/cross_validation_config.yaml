@@ -1,0 +1,51 @@
+# Cross-validation split configuration
+# Creates a 10% hold-out test set + 5-fold stratified CV on the remaining 90%.
+
+# =============================================================================
+# EXCLUDE STACKS (by stack id)
+# =============================================================================
+exclude_stacks:
+  - stack_000163
+  - stack_000147
+  - stack_000159
+  - stack_000090
+
+# =============================================================================
+# FILTERING CRITERIA
+# =============================================================================
+filters:
+  age:
+    min: 6
+    max: null
+  axial_stretch: null
+  pressure: null
+  region: null
+  classe: null
+  genetic: null
+  sex: null
+  orientation: null
+
+# =============================================================================
+# SPLIT PARAMETERS
+# =============================================================================
+split:
+  test_size: 0.1        # 10% hold-out test
+  n_folds: 5            # number of CV folds
+  random_seed: 123
+  stratify_by:
+    - "Age (wk)"
+    - "Sex"
+    - "Region"
+    - "Axial stretch"
+    - "Pressure"
+    - "Classe"
+    - "Orientation"
+    - "Genetic"
+
+# =============================================================================
+# OUTPUT OPTIONS
+# =============================================================================
+output:
+  generate_summary: true
+  generate_checks: true
+  indent_json: 2

@@ -52,6 +52,11 @@ def main():
     model = Lit3DClassifier(
         model_name=cfg.model_name,
         lr=cfg.lr,
+        optimizer=cfg.optimizer,
+        weight_decay=cfg.weight_decay,
+        warmup_epochs=cfg.warmup_epochs,
+        scheduler=cfg.scheduler,
+        max_epochs=cfg.epochs,
     )
 
     checkpoint_cb = ModelCheckpoint(
@@ -92,6 +97,8 @@ def main():
         "max_epochs": cfg.epochs,
         "limit_train_batches": cfg.limit_train_batches,
     }
+    if cfg.gradient_clip_val is not None:
+        trainer_kwargs["gradient_clip_val"] = cfg.gradient_clip_val
     if cfg.accelerator is not None:
         trainer_kwargs["accelerator"] = cfg.accelerator
     if cfg.devices is not None:

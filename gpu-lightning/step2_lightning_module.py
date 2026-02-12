@@ -2,13 +2,23 @@
 
 import torch
 from torch import nn, optim
+from torch.optim.lr_scheduler import CosineAnnealingLR, SequentialLR, LinearLR
 import lightning as L
 
 from models import get_model
 
 
 class Lit3DClassifier(L.LightningModule):
-    def __init__(self, model_name: str, lr: float):
+    def __init__(
+        self,
+        model_name: str,
+        lr: float,
+        optimizer: str = "adam",
+        weight_decay: float = 0.0,
+        warmup_epochs: int = 0,
+        scheduler: str | None = None,
+        max_epochs: int = 100,
+    ):
         super().__init__()
         self.save_hyperparameters()
         self.model = get_model(model_name, in_channels=3, num_classes=1)
@@ -73,4 +83,50 @@ class Lit3DClassifier(L.LightningModule):
         self.log("val_f1_mean", f1_mean, prog_bar=True, logger=True)
 
     def configure_optimizers(self):
-        return optim.Adam(self.parameters(), lr=self.hparams.lr)
+        # Choose optimizer
+        if self.hparams.optimizer == "adamw":
+            optimizer = optim.AdamW(
+                self.parameters(),
+                lr=self.hparams.lr,
+                weight_decay=self.hparams.weight_decay,
+            )
+        else:  # default: adam
+            optimizer = optim.Adam(self.parameters(), lr=self.hparams.lr)
+
+        # No scheduler requested -> return optimizer only
+        if self.hparams.scheduler is None:
+            return optimizer
+
+        # Build scheduler(s)
+        warmup_epochs = max(self.hparams.warmup_epochs, 0)
+        cosine_epochs = max(self.hparams.max_epochs - warmup_epochs, 1)
+
+        if self.hparams.scheduler == "cosine":
+            cosine = CosineAnnealingLR(optimizer, T_max=cosine_epochs)
+
+            if warmup_epochs > 0:
+                warmup = LinearLR(
+                    optimizer,
+                    start_factor=1e-3,     # start at lr * 1e-3
+                    end_factor=1.0,        # ramp up to full lr
+                    total_iters=warmup_epochs,
+                )
+                scheduler = SequentialLR(
+                    optimizer,
+                    schedulers=[warmup, cosine],
+                    milestones=[warmup_epochs],
+                )
+            else:
+                scheduler = cosine
+
+            return {
+                "optimizer": optimizer,
+                "lr_scheduler": {
+                    "scheduler": scheduler,
+                    "interval": "epoch",
+                    "frequency": 1,
+                },
+            }
+
+        # Unknown scheduler -> just return optimizer
+        return optimizer

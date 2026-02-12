@@ -10,6 +10,9 @@ Available models:
 - ViT3D-Large: vit3d_large.py
 - ConvNeXt3D-Small: convnext3d_small.py
 - ConvNeXt3D-Large: convnext3d_large.py
+- Swin3D-Tiny: swin3d.py (MONAI, ~10M params)
+- Swin3D-Small: swin3d.py (MONAI, ~39M params)
+- DenseNet121-3D: densenet3d.py (MONAI, ~11M params)
 """
 
 from .resnet3d_50 import ResNet3D50, create_model as create_resnet3d_50
@@ -20,6 +23,8 @@ from .vit3d_base import ViT3DBase, create_model as create_vit3d_base
 from .vit3d_large import ViT3DLarge, create_model as create_vit3d_large
 from .convnext3d_small import ConvNeXt3DSmall, create_model as create_convnext3d_small
 from .convnext3d_large import ConvNeXt3DLarge, create_model as create_convnext3d_large
+from .swin3d import Swin3DClassifier, create_swin3d_tiny, create_swin3d_small
+from .densenet3d import DenseNet3D121, create_model as create_densenet3d_121
 
 
 MODEL_REGISTRY = {
@@ -31,6 +36,9 @@ MODEL_REGISTRY = {
     'vit3d_large': create_vit3d_large,
     'convnext3d_small': create_convnext3d_small,
     'convnext3d_large': create_convnext3d_large,
+    'swin3d_tiny': create_swin3d_tiny,
+    'swin3d_small': create_swin3d_small,
+    'densenet3d_121': create_densenet3d_121,
 }
 
 
@@ -56,5 +64,7 @@ __all__ = [
     'SEResNet3D50', 'SEResNet3D101',
     'ViT3DBase', 'ViT3DLarge',
     'ConvNeXt3DSmall', 'ConvNeXt3DLarge',
+    'Swin3DClassifier',
+    'DenseNet3D121',
     'get_model', 'MODEL_REGISTRY',
 ]

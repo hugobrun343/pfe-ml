@@ -1,0 +1,27 @@
+run:
+  run_name: train_densenet3d_121
+  runs_root: /home/brunh/scratch_brunh/pfe-ml/_runs
+data:
+  preprocessed_dir: /home/brunh/scratch_lirmm-ar/PFE_Fiorio/ds_shared/data/hugo_preprocess/preprocessed_256x256x32_v2
+  train_test_split_json: /home/brunh/scratch_brunh/pfe-ml/_splits/full-dataset-v1.1/train_test_split.json
+  dataset_json: /home/brunh/scratch_lirmm-ar/PFE_Fiorio/ds_shared/ds.json
+input:
+  batch_size: 16
+training:
+  epochs: 100
+  learning_rate: 0.001
+  limit_train_batches: 1.0
+  early_stopping:
+    enabled: true
+    patience: 20
+    min_delta: 1.0e-05
+model:
+  name: densenet3d_121
+wandb:
+  project: resnet3d-binary-classification
+  run_name: train_densenet3d_121
+  group: train_preprocess_v2
+system:
+  accelerator: gpu
+  devices: 1
+  precision: 32-true

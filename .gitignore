@@ -16,3 +16,11 @@ checkpoints/
 # Weights & Biases
 wandb/
 .wandb/
+
+# SLURM logs
+slurm_logs/
+*.out
+*.err
+
+# Training runs (checkpoints, results, etc.)
+_runs/

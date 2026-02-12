@@ -1,10 +1,10 @@
 run:
   run_name: train_resnet3d_101
-  runs_root: /mnt/pve/work/work-hugo/_runs
+  runs_root: /home/brunh/scratch_brunh/pfe-ml/_runs
 data:
-  preprocessed_dir: /mnt/pve/ds_shared/data/preprocess/preprocessed_256x256x32_v2
-  train_test_split_json: /mnt/pve/work/work-hugo/_splits/full-dataset-v1.1/train_test_split.json
-  dataset_json: /mnt/pve/work/work-hugo/_dataset-json/dataset_final.json
+  preprocessed_dir: /home/brunh/scratch_lirmm-ar/PFE_Fiorio/ds_shared/data/hugo_preprocess/preprocessed_256x256x32_v3
+  train_test_split_json: /home/brunh/scratch_brunh/pfe-ml/_splits/full-dataset-v1.1/train_test_split.json
+  dataset_json: /home/brunh/scratch_lirmm-ar/PFE_Fiorio/ds_shared/ds.json
 input:
   batch_size: 24
 training:

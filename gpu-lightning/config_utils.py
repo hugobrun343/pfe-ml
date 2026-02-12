@@ -44,6 +44,13 @@ def parse_train_config(config: Dict[str, Any], config_path: str, project_root: P
     args.lr = training.get("learning_rate", 1e-3)
     args.limit_train_batches = training.get("limit_train_batches", 1.0)
 
+    # Optimizer / scheduler (optional, backward-compatible defaults)
+    args.optimizer = training.get("optimizer", "adam")
+    args.weight_decay = training.get("weight_decay", 0.0)
+    args.warmup_epochs = training.get("warmup_epochs", 0)
+    args.scheduler = training.get("scheduler", None)
+    args.gradient_clip_val = training.get("gradient_clip_val", None)
+
     args.early_stopping_enabled = early.get("enabled", False)
     args.early_stopping_patience = early.get("patience", 3)
     args.early_stopping_min_delta = early.get("min_delta", 0.0)

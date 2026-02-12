@@ -1,0 +1,100 @@
+======================================================================
+ISOLATION CHECKS
+======================================================================
+  [PASS] Test hold-out vs fold 0
+  [PASS] Test hold-out vs fold 1
+  [PASS] Test hold-out vs fold 2
+  [PASS] Test hold-out vs fold 3
+  [PASS] Test hold-out vs fold 4
+  [PASS] Val 0 vs val 1 disjoint
+  [PASS] Val 0 vs val 2 disjoint
+  [PASS] Val 0 vs val 3 disjoint
+  [PASS] Val 0 vs val 4 disjoint
+  [PASS] Val 1 vs val 2 disjoint
+  [PASS] Val 1 vs val 3 disjoint
+  [PASS] Val 1 vs val 4 disjoint
+  [PASS] Val 2 vs val 3 disjoint
+  [PASS] Val 2 vs val 4 disjoint
+  [PASS] Val 3 vs val 4 disjoint
+  [PASS] Union(val folds) == CV pool  -- union=643, expected=643
+  [PASS] Train/val disjoint fold 0
+  [PASS] Train/val disjoint fold 1
+  [PASS] Train/val disjoint fold 2
+  [PASS] Train/val disjoint fold 3
+  [PASS] Train/val disjoint fold 4
+
+FOLD SIZES
+----------------------------------------
+  Fold 0 val: 135
+  Fold 1 val: 126
+  Fold 2 val: 124
+  Fold 3 val: 129
+  Fold 4 val: 129
+  [PASS] Val sizes balanced  -- mean=128.6, max_dev=6.4
+
+======================================================================
+ALL PASSED
+======================================================================
+
+======================================================================
+DISTRIBUTION CHECKS  (>5% flagged)
+======================================================================
+
+  Age:
+    104                    global   3.1%  F0:  3.0%  F1:  3.2%  F2:  3.2%  F3:  3.1%  F4:  3.1%  diff  0.1%
+    12                     global   4.8%  F0:  4.4%  F1:  5.6%  F2:  4.8%  F3:  4.7%  F4:  4.7%  diff  0.7%
+    14                     global  46.8%  F0: 45.9%  F1: 47.6%  F2: 48.4%  F3: 47.3%  F4: 45.0%  diff  1.9%
+    16                     global   8.7%  F0:  8.1%  F1:  9.5%  F2:  8.9%  F3:  8.5%  F4:  8.5%  diff  0.8%
+    33                     global   6.8%  F0:  7.4%  F1:  6.3%  F2:  6.5%  F3:  7.8%  F4:  6.2%  diff  0.9%
+    40                     global   2.2%  F0:  3.0%  F1:  1.6%  F2:  1.6%  F3:  1.6%  F4:  3.1%  diff  0.9%
+    52                     global   9.0%  F0:  8.9%  F1:  8.7%  F2:  8.9%  F3:  8.5%  F4: 10.1%  diff  1.1%
+    6                      global   3.7%  F0:  4.4%  F1:  4.8%  F2:  3.2%  F3:  3.1%  F4:  3.1%  diff  1.0%
+    9                      global  14.8%  F0: 14.8%  F1: 12.7%  F2: 14.5%  F3: 15.5%  F4: 16.3%  diff  2.1%
+
+  Sex:
+    F                      global  21.2%  F0: 22.2%  F1: 23.0%  F2: 19.4%  F3: 20.2%  F4: 20.9%  diff  1.9%
+    M                      global  72.0%  F0: 71.1%  F1: 70.6%  F2: 72.6%  F3: 72.9%  F4: 72.9%  diff  1.4%
+    M/F                    global   6.8%  F0:  6.7%  F1:  6.3%  F2:  8.1%  F3:  7.0%  F4:  6.2%  diff  1.2%
+
+  Orientation:
+    D                      global  57.9%  F0: 59.3%  F1: 58.7%  F2: 54.8%  F3: 57.4%  F4: 58.9%  diff  3.0%
+    V                      global  33.3%  F0: 32.6%  F1: 33.3%  F2: 35.5%  F3: 33.3%  F4: 31.8%  diff  2.2%
+    null                   global   8.9%  F0:  8.1%  F1:  7.9%  F2:  9.7%  F3:  9.3%  F4:  9.3%  diff  0.9%
+
+  Genetic:
+    ApoE                   global  28.6%  F0: 28.9%  F1: 27.0%  F2: 28.2%  F3: 29.5%  F4: 29.5%  diff  1.6%
+    ApoE, Ang2             global   0.5%  F0:  0.7%  F1:  0.8%  F2:  0.8%  F3:  0.0%  F4:  0.0%  diff  0.5%
+    C1039                  global  15.2%  F0: 15.6%  F1: 13.5%  F2: 16.9%  F3: 15.5%  F4: 14.7%  diff  1.7%
+    C1039, Aggrecan_sh     global   1.2%  F0:  1.5%  F1:  1.6%  F2:  0.8%  F3:  0.8%  F4:  1.6%  diff  0.5%
+    C1039, NOS2_KO         global   1.2%  F0:  1.5%  F1:  1.6%  F2:  0.8%  F3:  1.6%  F4:  0.8%  diff  0.5%
+    C1039, Versican_sh     global   1.6%  F0:  1.5%  F1:  1.6%  F2:  1.6%  F3:  1.6%  F4:  1.6%  diff  0.1%
+    MMP12                  global   0.9%  F0:  0.0%  F1:  1.6%  F2:  0.0%  F3:  3.1%  F4:  0.0%  diff  2.2%
+    MMP12, ApoE            global   1.1%  F0:  0.7%  F1:  1.6%  F2:  1.6%  F3:  0.8%  F4:  0.8%  diff  0.5%
+    WT                     global  26.0%  F0: 26.7%  F1: 28.6%  F2: 24.2%  F3: 24.8%  F4: 25.6%  diff  2.6%
+    WT, NOS2_KO            global   1.4%  F0:  0.7%  F1:  1.6%  F2:  1.6%  F3:  1.6%  F4:  1.6%  diff  0.7%
+    WT_ApoE                global  10.4%  F0: 10.4%  F1: 10.3%  F2: 12.1%  F3:  9.3%  F4: 10.1%  diff  1.7%
+    alpha5/alpha2          global   5.4%  F0:  5.2%  F1:  4.8%  F2:  4.8%  F3:  5.4%  F4:  7.0%  diff  1.5%
+    alpha5/alpha2, mgR     global   4.4%  F0:  4.4%  F1:  4.0%  F2:  4.8%  F3:  4.7%  F4:  3.9%  diff  0.5%
+    mgR                    global   2.0%  F0:  2.2%  F1:  1.6%  F2:  1.6%  F3:  1.6%  F4:  3.1%  diff  1.1%
+
+  Classe:
+    MALADE                 global  55.8%  F0: 57.0%  F1: 53.2%  F2: 57.3%  F3: 55.8%  F4: 55.8%  diff  2.7%
+    SAIN                   global  44.2%  F0: 43.0%  F1: 46.8%  F2: 42.7%  F3: 44.2%  F4: 44.2%  diff  2.7%
+
+  Pressure:
+    120                    global  28.9%  F0: 26.7%  F1: 30.2%  F2: 32.3%  F3: 28.7%  F4: 27.1%  diff  3.3%
+    160                    global   0.3%  F0:  0.0%  F1:  0.0%  F2:  0.8%  F3:  0.0%  F4:  0.8%  diff  0.5%
+    40                     global  17.0%  F0: 18.5%  F1: 16.7%  F2: 15.3%  F3: 17.1%  F4: 17.1%  diff  1.6%
+    80                     global  53.8%  F0: 54.8%  F1: 53.2%  F2: 51.6%  F3: 54.3%  F4: 55.0%  diff  2.2%
+
+  Axial Stretch:
+    1                      global  11.7%  F0: 10.4%  F1:  7.9%  F2:  9.7%  F3: 16.3%  F4: 14.0%  diff  4.6%
+    2                      global  75.3%  F0: 80.7%  F1: 76.2%  F2: 77.4%  F3: 72.1%  F4: 69.8%  diff  5.5% ***
+    3                      global  13.1%  F0:  8.9%  F1: 15.9%  F2: 12.9%  F3: 11.6%  F4: 16.3%  diff  4.2%
+
+  Region:
+    ATA                    global  27.1%  F0: 28.9%  F1: 23.0%  F2: 25.8%  F3: 27.9%  F4: 29.5%  diff  4.0%
+    DTA                    global  47.6%  F0: 45.2%  F1: 53.2%  F2: 47.6%  F3: 46.5%  F4: 45.7%  diff  5.6% ***
+    SAA                    global  25.3%  F0: 25.9%  F1: 23.8%  F2: 26.6%  F3: 25.6%  F4: 24.8%  diff  1.5%
+
+  Warnings (>5%): 2
