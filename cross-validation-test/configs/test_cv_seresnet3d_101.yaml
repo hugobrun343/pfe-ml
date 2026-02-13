@@ -1,0 +1,24 @@
+# Cross-validation test config for SEResNet3D-101
+# Usage: python run_cv_test.py --config configs/test_cv_seresnet3d_101.yaml
+
+model:
+  name: seresnet3d_101
+
+paths:
+  preprocessed_dir: /home/brunh/scratch_lirmm-ar/PFE_Fiorio/ds_shared/data/hugo_preprocess/preprocessed_256x256x32_v2
+  cv_global_json: /home/brunh/scratch_brunh/pfe-ml/_splits/cv-5fold-v1/cv_global.json
+
+checkpoints:
+  # TODO: remplacer par les vrais paths quand les runs seront finies
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_seresnet3d_101_fold_0_PLACEHOLDER/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_seresnet3d_101_fold_1_PLACEHOLDER/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_seresnet3d_101_fold_2_PLACEHOLDER/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_seresnet3d_101_fold_3_PLACEHOLDER/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_seresnet3d_101_fold_4_PLACEHOLDER/checkpoints/best_model.pth
+
+inference:
+  batch_size: 32
+  device: cuda
+
+output:
+  results_dir: /home/brunh/scratch_brunh/pfe-ml/_results/cv_test_seresnet3d_101

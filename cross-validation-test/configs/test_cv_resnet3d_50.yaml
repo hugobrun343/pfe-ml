@@ -1,0 +1,23 @@
+# Cross-validation test config for ResNet3D-50
+# Usage: python run_cv_test.py --config configs/test_cv_resnet3d_50.yaml
+
+model:
+  name: resnet3d_50
+
+paths:
+  preprocessed_dir: /home/brunh/scratch_lirmm-ar/PFE_Fiorio/ds_shared/data/hugo_preprocess/preprocessed_256x256x32_v2
+  cv_global_json: /home/brunh/scratch_brunh/pfe-ml/_splits/cv-5fold-v1/cv_global.json
+
+checkpoints:
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_resnet3d_50_fold_0_20260213_024142/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_resnet3d_50_fold_1_20260213_043812/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_resnet3d_50_fold_2_20260213_064027/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_resnet3d_50_fold_3_20260213_080237/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_resnet3d_50_fold_4_20260213_094539/checkpoints/best_model.pth
+
+inference:
+  batch_size: 32
+  device: cuda
+
+output:
+  results_dir: /home/brunh/scratch_brunh/pfe-ml/_results/cv_test_resnet3d_50
