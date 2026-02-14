@@ -22,6 +22,9 @@ from step3_dataset import make_train_val_loaders
 def parse_args():
     parser = argparse.ArgumentParser(description="Lightning step 4: train + val")
     parser.add_argument("--config", required=True, help="Path to YAML config")
+    parser.add_argument("--ckpt_path", default=None, help="Path to .ckpt to resume training from")
+    parser.add_argument("--wandb_resume_id", default=None, help="WandB run ID to resume (shows as continued run)")
+    parser.add_argument("--run_dir", default=None, help="Existing run directory to reuse (for resume)")
     return parser.parse_args()
 
 
@@ -32,16 +35,33 @@ def main():
     raw_cfg = load_config(cli.config)
     cfg = parse_train_config(raw_cfg, cli.config, project_root)
 
-    run_dirs = create_run_directories(Path(cfg.runs_root), cfg.run_name)
-    run_name = run_dirs["run_name"]
+    if cli.run_dir:
+        # Resume mode: reuse existing run directory
+        run_dir = Path(cli.run_dir)
+        run_dirs = {
+            "run_dir": run_dir,
+            "checkpoints": run_dir / "checkpoints",
+            "results": run_dir / "results",
+            "analytics": run_dir / "analytics",
+            "wandb": run_dir / "wandb",
+            "data": run_dir / "data",
+            "run_name": run_dir.name,
+        }
+        for key, path in run_dirs.items():
+            if key != "run_name" and isinstance(path, Path):
+                path.mkdir(parents=True, exist_ok=True)
+        run_name = run_dirs["run_name"]
+    else:
+        run_dirs = create_run_directories(Path(cfg.runs_root), cfg.run_name)
+        run_name = run_dirs["run_name"]
 
-    copy_run_metadata(
-        preprocessed_dir=Path(cfg.preprocessed_dir),
-        split_json=Path(cfg.train_test_split_json),
-        data_dir=run_dirs["data"],
-        config_path=Path(cfg.config),
-        dataset_json=Path(cfg.dataset_json) if cfg.dataset_json else None,
-    )
+        copy_run_metadata(
+            preprocessed_dir=Path(cfg.preprocessed_dir),
+            split_json=Path(cfg.train_test_split_json),
+            data_dir=run_dirs["data"],
+            config_path=Path(cfg.config),
+            dataset_json=Path(cfg.dataset_json) if cfg.dataset_json else None,
+        )
 
     train_loader, val_loader = make_train_val_loaders(
         preprocessed_dir=cfg.preprocessed_dir,
@@ -82,13 +102,17 @@ def main():
         )
 
     wandb_run_name = cfg.wandb_run_name or run_name
-    wandb_logger = WandbLogger(
-        project=cfg.wandb_project,
-        name=wandb_run_name,
-        group=cfg.wandb_group,
-        save_dir=str(run_dirs["wandb"]),
-        log_model=False,
-    )
+    wandb_kwargs = {
+        "project": cfg.wandb_project,
+        "name": wandb_run_name,
+        "group": cfg.wandb_group,
+        "save_dir": str(run_dirs["wandb"]),
+        "log_model": False,
+    }
+    if cli.wandb_resume_id:
+        wandb_kwargs["id"] = cli.wandb_resume_id
+        wandb_kwargs["resume"] = "must"
+    wandb_logger = WandbLogger(**wandb_kwargs)
 
     trainer_kwargs = {
         "default_root_dir": str(run_dirs["run_dir"]),
@@ -107,7 +131,12 @@ def main():
         trainer_kwargs["precision"] = cfg.precision
 
     trainer = L.Trainer(**trainer_kwargs)
-    trainer.fit(model=model, train_dataloaders=train_loader, val_dataloaders=val_loader)
+    trainer.fit(
+        model=model,
+        train_dataloaders=train_loader,
+        val_dataloaders=val_loader,
+        ckpt_path=cli.ckpt_path,
+    )
 
     best_ckpt_path = checkpoint_cb.best_model_path
     if not best_ckpt_path:

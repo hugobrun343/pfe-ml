@@ -4,10 +4,10 @@
 #SBATCH --partition=gpu-dedicated
 #SBATCH --nodes=1
 #SBATCH --ntasks=1
-#SBATCH --cpus-per-task=16
-#SBATCH --mem=128G
+#SBATCH --cpus-per-task=8
+#SBATCH --mem=64G
 #SBATCH --gres=gpu:nvidia_h100_80gb_hbm3:1
-#SBATCH --time=08:00:00
+#SBATCH --time=48:00:00
 #SBATCH --output=/home/brunh/scratch_brunh/pfe-ml/gpu-lightning/slurm_logs/%x_%A_%a.out
 #SBATCH --error=/home/brunh/scratch_brunh/pfe-ml/gpu-lightning/slurm_logs/%x_%A_%a.err
 #SBATCH --export=ALL
