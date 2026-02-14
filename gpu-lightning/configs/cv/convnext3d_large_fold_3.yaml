@@ -1,0 +1,27 @@
+run:
+  run_name: cv_convnext3d_large_fold_3
+  runs_root: /home/brunh/scratch_brunh/pfe-ml/_runs
+data:
+  preprocessed_dir: /home/brunh/scratch_lirmm-ar/PFE_Fiorio/ds_shared/data/hugo_preprocess/preprocessed_256x256x32_v2
+  train_test_split_json: /home/brunh/scratch_brunh/pfe-ml/_splits/cv-5fold-v1/train_test_split_fold_3.json
+  dataset_json: /home/brunh/scratch_lirmm-ar/PFE_Fiorio/ds_shared/ds.json
+input:
+  batch_size: 32
+training:
+  epochs: 100
+  learning_rate: 0.001
+  limit_train_batches: 1.0
+  early_stopping:
+    enabled: true
+    patience: 20
+    min_delta: 1.0e-05
+model:
+  name: convnext3d_large
+wandb:
+  project: resnet3d-binary-classification
+  run_name: cv_convnext3d_large_fold_3
+  group: cv-convnext3d-large
+system:
+  accelerator: gpu
+  devices: 1
+  precision: 32-true

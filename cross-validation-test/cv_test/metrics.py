@@ -97,5 +97,5 @@ def _compute_auc(y_true: np.ndarray, y_prob: np.ndarray) -> float:
     fpr = np.concatenate([[0.0], fpr])
 
     # Trapezoidal integration
-    auc = float(np.trapz(tpr, fpr))
+    auc = float(np.trapezoid(tpr, fpr))
     return auc

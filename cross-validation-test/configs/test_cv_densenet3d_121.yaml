@@ -9,12 +9,11 @@ paths:
   cv_global_json: /home/brunh/scratch_brunh/pfe-ml/_splits/cv-5fold-v1/cv_global.json
 
 checkpoints:
-  # TODO: remplacer par les vrais paths quand les runs seront finies
-  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_densenet3d_121_fold_0_PLACEHOLDER/checkpoints/best_model.pth
-  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_densenet3d_121_fold_1_PLACEHOLDER/checkpoints/best_model.pth
-  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_densenet3d_121_fold_2_PLACEHOLDER/checkpoints/best_model.pth
-  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_densenet3d_121_fold_3_PLACEHOLDER/checkpoints/best_model.pth
-  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_densenet3d_121_fold_4_PLACEHOLDER/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_densenet3d_121_fold_0_20260213_210531/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_densenet3d_121_fold_1_20260213_213957/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_densenet3d_121_fold_2_20260213_215026/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_densenet3d_121_fold_3_20260213_225212/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_densenet3d_121_fold_4_20260213_231020/checkpoints/best_model.pth
 
 inference:
   batch_size: 32

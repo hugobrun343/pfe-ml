@@ -235,7 +235,7 @@ Correction appliquee : `AdamW` (weight_decay=0.05), `lr=0.0001`, warmup 5 epochs
 |--------|-----------------|-----------|------|
 | ViT3D-Base | 0.9167 | AdamW | Deblocage reussi |
 | Swin3D-Tiny | 0.8913 | AdamW | Deblocage reussi |
-| Swin3D-Small | *en cours* | AdamW | |
+| Swin3D-Small | 0.8772 | AdamW | Deblocage reussi |
 | ConvNeXt3D-Large | *en cours* | AdamW | |
 
 ### 3.4 Synthese comparative (meilleur resultat par modele)
@@ -250,7 +250,7 @@ Correction appliquee : `AdamW` (weight_decay=0.05), `lr=0.0001`, warmup 5 epochs
 | 6 | ResNet3D-50 | 0.9427 | Adam | intensity_global | 46.2M |
 | 7 | ViT3D-Base | 0.9167 | AdamW | intensity_global | 89.0M |
 | 8 | Swin3D-Tiny | 0.8913 | AdamW | intensity_global | 9.8M |
-| 9 | Swin3D-Small | *en cours* | AdamW | intensity_global | 38.7M |
+| 9 | Swin3D-Small | 0.8772 | AdamW | intensity_global | 38.7M |
 
 > **Observation** : SEResNet3D-50 obtient le meilleur F1 global (0.9602) sur intensity_global.
 > DenseNet3D-121 offre le meilleur ratio perf/taille (0.9528 avec seulement 11.3M params).
@@ -298,53 +298,116 @@ Correction appliquee : `AdamW` (weight_decay=0.05), `lr=0.0001`, warmup 5 epochs
 | Fold | val_f1_mean |
 |------|------------|
 | 0 | 0.9483 |
-| 1 | **0.9683** |
+| 1 | 0.9683 |
 | 2 | 0.9430 |
-| 3 | *en cours* |
-| 4 | *en cours* |
+| 3 | **0.9791** |
+| 4 | 0.8953 |
+| **Moyenne** | **0.9468** |
+| Ecart-type | 0.0289 |
 
 ### 4.5 Resultats -- SEResNet3D-101
 
 | Fold | val_f1_mean |
 |------|------------|
-| 0-4 | *en cours (en queue)* |
+| 0 | 0.9556 |
+| 1 | 0.9611 |
+| 2 | 0.9381 |
+| 3 | **0.9622** |
+| 4 | 0.9078 |
+| **Moyenne** | **0.9450** |
+| Ecart-type | 0.0205 |
 
 ### 4.6 Resultats -- DenseNet3D-121
 
 | Fold | val_f1_mean |
 |------|------------|
-| 0-4 | *en cours* |
+| 0 | 0.9639 |
+| 1 | 0.9616 |
+| 2 | 0.9529 |
+| 3 | **0.9668** |
+| 4 | 0.9162 |
+| **Moyenne** | **0.9523** |
+| Ecart-type | 0.0186 |
 
-### 4.7 Comparaison (folds termines)
+### 4.7 Comparaison (5 modeles, 5 folds chacun)
 
-| Modele | F1 mean (moy. 5 folds) | Ecart-type | Meilleur fold | Pire fold |
-|--------|------------------------|------------|---------------|-----------|
-| ResNet3D-50 | **0.9462** | 0.0273 | Fold 1 (0.9647) | Fold 4 (0.8955) |
-| SEResNet3D-50 | 0.9449 | 0.0143 | Fold 1 (0.9581) | Fold 4 (0.9265) |
+| Rang | Modele | F1 mean (moy. 5 folds) | Ecart-type | Meilleur fold | Pire fold |
+|------|--------|------------------------|------------|---------------|-----------|
+| 1 | DenseNet3D-121 | **0.9523** | 0.0186 | Fold 3 (0.9668) | Fold 4 (0.9162) |
+| 2 | ResNet3D-101 | 0.9468 | 0.0289 | Fold 3 (0.9791) | Fold 4 (0.8953) |
+| 3 | ResNet3D-50 | 0.9462 | 0.0273 | Fold 1 (0.9647) | Fold 4 (0.8955) |
+| 4 | SEResNet3D-101 | 0.9450 | 0.0205 | Fold 3 (0.9622) | Fold 4 (0.9078) |
+| 5 | SEResNet3D-50 | 0.9449 | 0.0143 | Fold 1 (0.9581) | Fold 4 (0.9265) |
 
-> **Observation** : le fold 4 est systematiquement le plus faible pour les deux modeles,
-> ce qui suggere une distribution de donnees legerement plus difficile dans ce fold.
-> Le SEResNet3D-50 a un ecart-type plus faible (0.014 vs 0.027), signe d'une meilleure stabilite.
+> **Observations :**
+> - **DenseNet3D-121** arrive en tete de la CV (0.9523) avec seulement 11.3M params -- meilleur ratio perf/taille et meilleure generalisation.
+> - Le **fold 4** est systematiquement le plus faible pour les 5 modeles, suggerant une distribution de donnees plus difficile dans ce fold.
+> - Le **fold 3** est le meilleur pour 3 modeles sur 5, le **fold 1** pour les 2 autres.
+> - **SEResNet3D-50** a l'ecart-type le plus faible (0.0143), signe de la meilleure stabilite.
+> - Les 5 modeles CNN sont tres proches en moyenne (0.9449--0.9523), confirmant la robustesse de l'approche CNN sur ce dataset.
 
 ---
 
-## 5. Test sur holdout (pipeline CV test)
+## 5. Test sur holdout (94 stacks)
 
-### 5.1 Statut pipeline
+### 5.1 Protocole
 
-Le pipeline de test cross-validation est operationnel (`cross-validation-test/`).
-Il charge les 5 checkpoints d'un modele, fait l'inference sur les 94 stacks holdout (1504 patches),
-agrege les scores par stack (mean probability), ensemble les 5 modeles (mean probability),
-et produit des metriques detaillees (F1, accuracy, AUC, confusion matrix).
+Le pipeline de test charge les **5 checkpoints** (1 par fold) d'un modele, fait l'inference sur les **94 stacks holdout** (1459 patches), agrege les scores par stack (moyenne des probabilites des patches), **ensemble les 5 modeles** (moyenne des probabilites), et produit des metriques detaillees.
 
-### 5.2 TODO
+### 5.2 Resultats -- Ensemble (5 modeles)
 
-- [ ] Completer les folds ResNet3D-101 (folds 3-4 en cours)
-- [ ] Completer les folds SEResNet3D-101 (5 folds en cours)
-- [ ] Completer les folds DenseNet3D-121 (5 folds en cours)
-- [ ] Lancer le test holdout pour ResNet3D-50 et SEResNet3D-50
-- [ ] Lancer le test holdout pour ResNet3D-101, SEResNet3D-101, DenseNet3D-121
-- [ ] Comparer les performances holdout (vrais resultats de generalisation)
-- [ ] Completer les resultats Swin3D-Small et ConvNeXt3D-Large (AdamW, en cours)
-- [ ] Envisager CV pour les transformers (apres validation des resultats AdamW)
-- [ ] Analyser les stacks mal classees (per-stack details dans results.json)
+| Rang | Modele | F1 mean | Accuracy | AUC | Erreurs (sur 94) |
+|------|--------|---------|----------|-----|------------------|
+| 1 | **ResNet3D-101** | **0.9785** | 0.9787 | 0.9913 | 2 FP |
+| 1 | **DenseNet3D-121** | **0.9785** | 0.9787 | 0.9927 | 2 FP |
+| 3 | SEResNet3D-101 | 0.9678 | 0.9681 | **0.9964** | 2 FP + 1 FN |
+| 3 | ResNet3D-50 | 0.9676 | 0.9681 | 0.9891 | 3 FP |
+| 3 | SEResNet3D-50 | 0.9679 | 0.9681 | 0.9927 | 2 FP + 1 FN |
+
+> **Observations :**
+> - **ResNet3D-101** et **DenseNet3D-121** partagent la 1ere place avec F1=0.9785 et seulement 2 erreurs (faux positifs).
+> - **SEResNet3D-101** obtient le meilleur **AUC** (0.9964), signe de la meilleure calibration des probabilites.
+> - Les 5 modeles depassent **96.7% F1** sur des donnees jamais vues -- generalisation tres solide.
+> - DenseNet3D-121 egalise ResNet3D-101 avec **18x moins de parametres** (11.3M vs 85.2M).
+
+### 5.3 Confusion matrices
+
+**ResNet3D-101 / DenseNet3D-121 (identiques) :**
+
+|  | Pred SAIN | Pred MALADE |
+|--|-----------|-------------|
+| **Vrai SAIN** | 41 | 2 |
+| **Vrai MALADE** | 0 | 51 |
+
+**SEResNet3D-50 / SEResNet3D-101 (identiques) :**
+
+|  | Pred SAIN | Pred MALADE |
+|--|-----------|-------------|
+| **Vrai SAIN** | 41 | 2 |
+| **Vrai MALADE** | 1 | 50 |
+
+**ResNet3D-50 :**
+
+|  | Pred SAIN | Pred MALADE |
+|--|-----------|-------------|
+| **Vrai SAIN** | 40 | 3 |
+| **Vrai MALADE** | 0 | 51 |
+
+### 5.4 Stacks problematiques
+
+Certains stacks sont systematiquement mal classes par tous les modeles :
+
+| Stack | Label reel | Comportement |
+|-------|-----------|-------------|
+| **stack_000754** | SAIN | Predit MALADE par les 5 modeles (proba 0.92--0.97). Faux positif recurrent. |
+| **stack_000708** | SAIN | Predit MALADE par 4/5 modeles (proba 0.69--0.84). Faux positif limite. |
+| **stack_000763** | MALADE | Predit SAIN par 2/5 modeles (proba 0.35--0.62). Cas difficile a la frontiere. |
+
+> Ces stacks meritent une inspection visuelle pour verifier la qualite des annotations ou detecter des artefacts.
+
+### 5.5 TODO
+
+- [ ] Completer ConvNeXt3D-Large (AdamW single-split, en cours)
+- [ ] CV + holdout pour ConvNeXt3D-Large et ViT3D-Base (en cours)
+- [ ] Analyser visuellement les stacks problematiques (754, 708, 763)
+- [ ] Envisager un seuil optimise (au lieu de 0.5) base sur les courbes ROC
