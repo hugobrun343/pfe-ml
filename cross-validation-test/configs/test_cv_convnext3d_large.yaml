@@ -1,0 +1,23 @@
+# Cross-validation test config for ConvNeXt3D-Large
+# Usage: python run_cv_test.py --config configs/test_cv_convnext3d_large.yaml
+
+model:
+  name: convnext3d_large
+
+paths:
+  preprocessed_dir: /home/brunh/scratch_lirmm-ar/PFE_Fiorio/ds_shared/data/hugo_preprocess/preprocessed_256x256x32_v2
+  cv_global_json: /home/brunh/scratch_brunh/pfe-ml/_splits/cv-5fold-v1/cv_global.json
+
+checkpoints:
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_convnext3d_large_fold_0_20260214_140730/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_convnext3d_large_fold_1_20260214_205326/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_convnext3d_large_fold_2_20260214_205326/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_convnext3d_large_fold_3_20260214_233102/checkpoints/best_model.pth
+  - /home/brunh/scratch_brunh/pfe-ml/_runs/cv_convnext3d_large_fold_4_20260215_080858/checkpoints/best_model.pth
+
+inference:
+  batch_size: 64
+  device: cuda
+
+output:
+  results_dir: /home/brunh/scratch_brunh/pfe-ml/_results/cv_test_convnext3d_large

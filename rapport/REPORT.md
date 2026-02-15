@@ -279,26 +279,28 @@ L'objectif de cette etude est de :
 
 ### 4.2 Protocole
 
-- **Entree** : les patches preprocesses ont une dimension `(3, 32, 256, 256)`. On selectionne un **unique canal** (canal 1, 2 ou 3) pour obtenir un tenseur `(1, 32, 256, 256)` passe au modele.
+- **Entree** : les patches preprocesses ont une dimension `(3, 32, 256, 256)`. On selectionne un **unique canal** (canal 0, 1 ou 2) pour obtenir un tenseur `(1, 32, 256, 256)` passe au modele.
 - **Modeles retenus** : ResNet3D-50, ResNet3D-101, DenseNet3D-121
-- **Variantes** : 3 par modele (ch1, ch2, ch3)
+- **Variantes** : 3 par modele (ch0, ch1, ch2)
 - **Preprocess** : intensity_global (identique aux runs principaux)
 - **Split** : meme split train/val que les runs single-split de la section 3
 - **Entrainement** : parametres identiques aux CNN de la section 3 (Adam, lr=0.001, 100 epochs max, early stopping patience 20)
 
 ### 4.3 Resultats
 
-| Modele | Canal 1 | Canal 2 | Canal 3 | 3 canaux (ref) |
+| Modele | Canal 0 | Canal 1 | Canal 2 | 3 canaux (ref) |
 |--------|---------|---------|---------|----------------|
-| ResNet3D-50 | 0.7967 | 0.7567 | **0.9009** | 0.9427 |
-| ResNet3D-101 | *en cours* | *en cours* | *en cours* | 0.9515 |
-| DenseNet3D-121 | *en cours* | *en cours* | *en cours* | 0.9528 |
+| ResNet3D-50 | 0.7967 | 0.7567 | 0.9009 | 0.9427 |
+| ResNet3D-101 | 0.8149 | 0.8145 | 0.8985 | 0.9515 |
+| DenseNet3D-121 | 0.8577 | 0.9009 | **0.9476** | 0.9528 |
 
 > La colonne "3 canaux (ref)" reprend les meilleurs resultats de la section 3.3 (intensity_global, CNN) pour comparaison directe.
 
 ### 4.4 Analyse
 
-*A completer apres les resultats des 9 runs.*
+- Le **canal 2** est systematiquement le meilleur pour les 3 modeles, avec un ecart important par rapport aux canaux 0 et 1 (+5 a +14 points F1).
+- **DenseNet3D-121 sur canal 2** atteint **0.9476**, quasi equivalent a la reference 3-canaux (0.9528, soit -0.5 points). Cela montre que le canal 2 porte la quasi-totalite de l'information discriminante.
+- Le gain apporte par les 3 canaux combines reste reel mais modeste parfois : DenseNet3D-121 (+0.5 points), ResNet3D-50 (+4.2 points) et ResNet3D-101 (+5.3 points).
 
 ---
 
@@ -310,84 +312,38 @@ L'objectif de cette etude est de :
 - **90% restants** : 643 stacks repartis en 5 folds stratifies (age, sexe, region, etc.)
 - Chaque fold entraine sur 4/5 des 643 stacks, valide sur 1/5
 - Preprocess : **intensity_global**
-- Tous les modeles entraines avec **Adam, lr=0.001, batch_size variable**
+- CNN entraines avec **Adam, lr=0.001** ; ConvNeXt3D-Large avec **AdamW, lr=0.0001, warmup + cosine**
+- Batch size variable selon l'architecture
 
-### 5.2 Resultats -- ResNet3D-50
+### 5.2 Resultats par fold (val_f1_mean)
 
-| Fold | val_f1_mean | Epochs | Temps |
-|------|------------|--------|-------|
-| 0 | 0.9579 | 55 (ES) | 1h56 |
-| 1 | **0.9647** | 58 (ES) | 2h02 |
-| 2 | 0.9498 | 41 (ES) | 1h24 |
-| 3 | 0.9633 | 52 (ES) | 1h43 |
-| 4 | 0.8955 | 43 (ES) | 1h25 |
-| **Moyenne** | **0.9462** | ~50 | ~1h42 |
-| Ecart-type | 0.0273 | | |
+| Modele | Fold 0 | Fold 1 | Fold 2 | Fold 3 | Fold 4 | Moyenne | Ecart-type |
+|--------|--------|--------|--------|--------|--------|---------|------------|
+| DenseNet3D-121 | 0.9639 | 0.9616 | 0.9529 | **0.9668** | 0.9162 | **0.9523** | 0.0186 |
+| ConvNeXt3D-Large | 0.9495 | 0.9601 | 0.9440 | **0.9648** | 0.9351 | **0.9507** | 0.0107 |
+| ResNet3D-101 | 0.9483 | 0.9683 | 0.9430 | **0.9791** | 0.8953 | **0.9468** | 0.0289 |
+| ResNet3D-50 | 0.9579 | **0.9647** | 0.9498 | 0.9633 | 0.8955 | **0.9462** | 0.0273 |
+| SEResNet3D-101 | 0.9556 | 0.9611 | 0.9381 | **0.9622** | 0.9078 | **0.9450** | 0.0205 |
+| SEResNet3D-50 | 0.9526 | **0.9581** | 0.9313 | 0.9561 | 0.9265 | **0.9449** | 0.0143 |
 
-### 5.3 Resultats -- SEResNet3D-50
+> Modeles tries par F1 mean decroissant.
 
-| Fold | val_f1_mean | Epochs | Temps |
-|------|------------|--------|-------|
-| 0 | 0.9526 | 42 (ES) | 1h37 |
-| 1 | **0.9581** | 51 (ES) | 1h55 |
-| 2 | 0.9313 | 46 (ES) | 1h44 |
-| 3 | 0.9561 | 31 (ES) | 1h07 |
-| 4 | 0.9265 | 60 (ES) | 2h04 |
-| **Moyenne** | **0.9449** | ~46 | ~1h41 |
-| Ecart-type | 0.0143 | | |
+### 5.3 Synthese
 
-### 5.4 Resultats -- ResNet3D-101
-
-| Fold | val_f1_mean | Epochs | Temps |
-|------|------------|--------|-------|
-| 0 | 0.9483 | 46 (ES) | 1h43 |
-| 1 | 0.9683 | 52 (ES) | 1h57 |
-| 2 | 0.9430 | 51 (ES) | 1h56 |
-| 3 | **0.9791** | 76 (ES) | 2h44 |
-| 4 | 0.8953 | 34 (ES) | 1h19 |
-| **Moyenne** | **0.9468** | ~52 | ~1h56 |
-| Ecart-type | 0.0289 | | |
-
-### 5.5 Resultats -- SEResNet3D-101
-
-| Fold | val_f1_mean |
-|------|------------|
-| 0 | 0.9556 |
-| 1 | 0.9611 |
-| 2 | 0.9381 |
-| 3 | **0.9622** |
-| 4 | 0.9078 |
-| **Moyenne** | **0.9450** |
-| Ecart-type | 0.0205 |
-
-### 5.6 Resultats -- DenseNet3D-121
-
-| Fold | val_f1_mean | Epochs | Temps |
-|------|------------|--------|-------|
-| 0 | 0.9639 | 51 (ES) | 2h05 |
-| 1 | 0.9616 | 52 (ES) | 2h01 |
-| 2 | 0.9529 | 49 (ES) | 1h54 |
-| 3 | **0.9668** | 48 (ES) | 1h57 |
-| 4 | 0.9162 | 46 (ES) | 1h53 |
-| **Moyenne** | **0.9523** | ~49 | ~1h58 |
-| Ecart-type | 0.0186 | | |
-
-### 5.7 Comparaison (5 modeles, 5 folds chacun)
-
-| Rang | Modele | F1 mean (moy. 5 folds) | Ecart-type | Meilleur fold | Pire fold | Epochs moy. | Temps moy./fold | Temps total |
-|------|--------|------------------------|------------|---------------|-----------|-------------|----------------|-------------|
-| 1 | DenseNet3D-121 | **0.9523** | 0.0186 | Fold 3 (0.9668) | Fold 4 (0.9162) | ~49 | ~1h58 | ~9h49 |
-| 2 | ResNet3D-101 | 0.9468 | 0.0289 | Fold 3 (0.9791) | Fold 4 (0.8953) | ~52 | ~1h56 | ~9h40 |
-| 3 | ResNet3D-50 | 0.9462 | 0.0273 | Fold 1 (0.9647) | Fold 4 (0.8955) | ~50 | ~1h42 | ~8h31 |
-| 4 | SEResNet3D-101 | 0.9450 | 0.0205 | Fold 3 (0.9622) | Fold 4 (0.9078) | ~68 | ~2h48 | ~14h02 |
-| 5 | SEResNet3D-50 | 0.9449 | 0.0143 | Fold 1 (0.9581) | Fold 4 (0.9265) | ~46 | ~1h41 | ~8h27 |
+| Rang | Modele | F1 mean | Ecart-type | Meilleur fold | Pire fold | Temps total |
+|------|--------|---------|------------|---------------|-----------|-------------|
+| 1 | DenseNet3D-121 | **0.9523** | 0.0186 | Fold 3 (0.9668) | Fold 4 (0.9162) | ~9h49 |
+| 2 | ConvNeXt3D-Large | 0.9507 | 0.0107 | Fold 3 (0.9648) | Fold 4 (0.9351) | ~80h18 |
+| 3 | ResNet3D-101 | 0.9468 | 0.0289 | Fold 3 (0.9791) | Fold 4 (0.8953) | ~9h40 |
+| 4 | ResNet3D-50 | 0.9462 | 0.0273 | Fold 1 (0.9647) | Fold 4 (0.8955) | ~8h31 |
+| 5 | SEResNet3D-101 | 0.9450 | 0.0205 | Fold 3 (0.9622) | Fold 4 (0.9078) | ~14h02 |
+| 6 | SEResNet3D-50 | 0.9449 | 0.0143 | Fold 1 (0.9581) | Fold 4 (0.9265) | ~8h27 |
 
 > **Observations :**
 > - **DenseNet3D-121** arrive en tete de la CV (0.9523) avec seulement 11.3M params -- meilleur ratio perf/taille et meilleure generalisation.
-> - Le **fold 4** est systematiquement le plus faible pour les 5 modeles, suggerant une distribution de donnees plus difficile dans ce fold.
-> - Le **fold 3** est le meilleur pour 3 modeles sur 5, le **fold 1** pour les 2 autres.
-> - **SEResNet3D-50** a l'ecart-type le plus faible (0.0143), signe de la meilleure stabilite.
-> - Les 5 modeles CNN sont tres proches en moyenne (0.9449--0.9523), confirmant la robustesse de l'approche CNN sur ce dataset.
+> - **ConvNeXt3D-Large** se place 2e (0.9507) mais un temps total de ~80h (10x plus que DenseNet).
+> - Le **fold 4** est systematiquement le plus faible pour les 6 modeles, suggerant une distribution de donnees plus difficile dans ce fold.
+> - Le **fold 3** est le meilleur pour 4 modeles sur 6, le **fold 1** pour les 2 autres.
 
 ---
 
@@ -414,13 +370,15 @@ Le pipeline de test utilise les **5 checkpoints** issus de la cross-validation (
 | 1 | **ResNet3D-101** | **0.9785** | 0.9787 | 0.9913 | 2 FP |
 | 1 | **DenseNet3D-121** | **0.9785** | 0.9787 | 0.9927 | 2 FP |
 | 3 | SEResNet3D-101 | 0.9678 | 0.9681 | **0.9964** | 2 FP + 1 FN |
-| 3 | ResNet3D-50 | 0.9676 | 0.9681 | 0.9891 | 3 FP |
 | 3 | SEResNet3D-50 | 0.9679 | 0.9681 | 0.9927 | 2 FP + 1 FN |
+| 5 | ResNet3D-50 | 0.9676 | 0.9681 | 0.9891 | 3 FP |
+| 6 | ConvNeXt3D-Large | 0.9567 | 0.9574 | 0.9923 | 4 FP |
 
 > **Observations :**
 > - **ResNet3D-101** et **DenseNet3D-121** partagent la 1ere place avec F1=0.9785 et seulement 2 erreurs (faux positifs).
 > - **SEResNet3D-101** obtient le meilleur **AUC** (0.9964), signe de la meilleure calibration des probabilites.
 > - DenseNet3D-121 egalise ResNet3D-101 avec **18x moins de parametres** (11.3M vs 85.2M).
+> - **ConvNeXt3D-Large**, malgre ses 210M params et son excellent F1 en single-split (0.9606), se place dernier sur le holdout (0.9567, 4 FP) -- signe d'un possible overfitting.
 
 ### 6.3 Confusion matrices
 
@@ -445,17 +403,24 @@ Le pipeline de test utilise les **5 checkpoints** issus de la cross-validation (
 | **Vrai SAIN** | 40 | 3 |
 | **Vrai MALADE** | 0 | 51 |
 
+**ConvNeXt3D-Large :**
+
+|  | Pred SAIN | Pred MALADE |
+|--|-----------|-------------|
+| **Vrai SAIN** | 39 | 4 |
+| **Vrai MALADE** | 0 | 51 |
+
 ### 6.4 Stacks problematiques
 
 Certains stacks sont systematiquement mal classes par tous les modeles :
 
 | Stack | Label reel | Comportement |
 |-------|-----------|-------------|
-| **stack_000754** | SAIN | Predit MALADE par les 5 modeles (proba 0.92--0.97). Faux positif recurrent. |
-| **stack_000708** | SAIN | Predit MALADE par 4/5 modeles (proba 0.69--0.84). Faux positif limite. |
+| **stack_000754** | SAIN | Predit MALADE par les 6 modeles (proba 0.92--0.97). Faux positif recurrent. |
+| **stack_000708** | SAIN | Predit MALADE par 5/6 modeles (proba 0.69--0.87). Faux positif limite. |
 
 > Ces stacks meritent une inspection visuelle pour verifier la qualite des annotations ou detecter des artefacts.
 
 ### 6.5 TODO
 
-- [ ] CV + holdout pour ConvNeXt3D-Large et ViT3D-Base (en cours)
+- [ ] CV + holdout pour ViT3D-Base (CV en cours)
