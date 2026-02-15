@@ -161,7 +161,7 @@ Les patches sont initialement sauvegardes au format `.nii.gz`, puis convertis en
 
 ### 3.1 Configuration d'entrainement
 
-**Entree :** patches 256x256x32, repetes sur 3 canaux (grayscale → RGB) pour compatibilite avec les architectures pretrained.
+**Entree :** patches 3x256x256x32 (3 canaux issus du preprocessing).
 
 **Sortie :** 1 logit → sigmoide pour la probabilite SAIN/MALADE.
 
@@ -241,20 +241,22 @@ Correction appliquee : `AdamW` (weight_decay=0.05), `lr=0.0001`, warmup 5 epochs
 
 ### 3.4 Synthese comparative (meilleur resultat par modele)
 
-| Rang | Modele | val_f1_mean | Epochs | Temps | Optimizer | Params |
-|------|--------|------------|--------|-------|-----------|--------|
-| 1 | SEResNet3D-50 | **0.9602** | 100 | 3h59 | Adam | 48.7M |
-| 2 | ConvNeXt3D-Large | 0.9606 | 100 | ~37h | AdamW | 210M |
-| 3 | SEResNet3D-101 | 0.9548 | 85 | 3h54 | Adam | 90.0M |
-| 4 | DenseNet3D-121 | 0.9528 | 72 | 3h24 | Adam | 11.3M |
-| 5 | ResNet3D-101 | 0.9515 | 74 | 3h17 | Adam | 85.2M |
-| 6 | ConvNeXt3D-Large | 0.9485 | - | - | Adam | 210M |
-| 7 | ResNet3D-50 | 0.9427 | 55 | 2h10 | Adam | 46.2M |
-| 8 | ViT3D-Base | 0.9167 | 70 | 10h45 | AdamW | 89.0M |
-| 9 | Swin3D-Tiny | 0.8913 | 69 | 8h12 | AdamW | 9.8M |
-| 10 | Swin3D-Small | 0.8772 | 93 | 19h00 | AdamW | 38.7M |
+| Rang | Modele | val_f1_mean | Epochs | Temps | Batch size | GPU | Optimizer | Params |
+|------|--------|------------|--------|-------|------------|-----|-----------|--------|
+| 1 | ConvNeXt3D-Large | **0.9606** | 100 | ~37h | 32 | 80GB | AdamW | 210M |
+| 2 | SEResNet3D-50 | 0.9602 | 100 | 3h59 | 32 | 40GB | Adam | 48.7M |
+| 3 | SEResNet3D-101 | 0.9548 | 85 | 3h54 | 24 | 40GB | Adam | 90.0M |
+| 4 | DenseNet3D-121 | 0.9528 | 72 | 3h24 | 16 | 40GB | Adam | 11.3M |
+| 5 | ResNet3D-101 | 0.9515 | 74 | 3h17 | 24 | 40GB | Adam | 85.2M |
+| 6 | ResNet3D-50 | 0.9427 | 55 | 2h10 | 32 | 40GB | Adam | 46.2M |
+| 7 | ViT3D-Base | 0.9167 | 70 | 10h45 | 8 | 80GB | AdamW | 89.0M |
+| 8 | Swin3D-Tiny | 0.8913 | 69 | 8h12 | 8 | 80GB | AdamW | 9.8M |
+| 9 | Swin3D-Small | 0.8772 | 93 | 19h00 | 4 | 80GB | AdamW | 38.7M |
 
-> **Observation** : SEResNet3D-50 obtient le meilleur F1 global (0.9602) sur intensity_global.
+> GPU = H100 MIG 40GB ou H100 complète 80GB.
+
+> **Observation** : ConvNeXt3D-Large obtient le meilleur F1 global (0.9606) mais necessite 37h et un GPU 80GB.
+> SEResNet3D-50 atteint un F1 quasi equivalent (0.9602) avec Adam en moins de 4h sur un GPU 40GB.
 > DenseNet3D-121 offre le meilleur ratio perf/taille (0.9528 avec seulement 11.3M params).
 > Les modeles CNN classiques (ResNet, SEResNet) sont robustes et stables avec un optimizer simple (Adam).
 > Les transformers necessitent un tuning specifique (AdamW, warmup, scheduler) pour converger.
@@ -265,12 +267,11 @@ Correction appliquee : `AdamW` (weight_decay=0.05), `lr=0.0001`, warmup 5 epochs
 
 ### 4.1 Motivation
 
-Dans la section 3, tous les modeles recoivent des patches a **3 canaux identiques** : le volume grayscale original est replique 3 fois pour former une entree `(3, 32, 256, 256)`, par compatibilite avec les architectures conçues pour du RGB.
+Dans la section 3, tous les modeles recoivent des patches a **3 canaux** d'entree `(3, 32, 256, 256)`, issus du preprocessing.
 
-Cette approche souleve une question : **l'information utile est-elle repartie differemment selon les canaux du preprocessing, et un seul canal suffit-il a atteindre des performances comparables ?**
+Cette configuration souleve une question : **les 3 canaux contribuent-ils de maniere egale a la classification, et un seul canal suffit-il a atteindre des performances comparables ?**
 
 L'objectif de cette etude est de :
-- Evaluer la performance de chaque canal individuellement
 - Determiner si un canal porte plus d'information discriminante que les autres
 - Comparer les resultats single-channel aux resultats 3-canaux de reference
 
@@ -280,8 +281,7 @@ L'objectif de cette etude est de :
 
 - **Entree** : les patches preprocesses ont une dimension `(3, 32, 256, 256)`. On selectionne un **unique canal** (canal 1, 2 ou 3) pour obtenir un tenseur `(1, 32, 256, 256)` passe au modele.
 - **Modeles retenus** : ResNet3D-50, ResNet3D-101, DenseNet3D-121
-- **Variantes** : 3 par modele (ch1, ch2, ch3), soit **9 runs** au total
-- **Batch size** : double par rapport aux runs 3-canaux (ResNet3D-50 : 64, ResNet3D-101 : 48, DenseNet3D-121 : 32) grace a la reduction de memoire GPU
+- **Variantes** : 3 par modele (ch1, ch2, ch3)
 - **Preprocess** : intensity_global (identique aux runs principaux)
 - **Split** : meme split train/val que les runs single-split de la section 3
 - **Entrainement** : parametres identiques aux CNN de la section 3 (Adam, lr=0.001, 100 epochs max, early stopping patience 20)
@@ -290,7 +290,7 @@ L'objectif de cette etude est de :
 
 | Modele | Canal 1 | Canal 2 | Canal 3 | 3 canaux (ref) |
 |--------|---------|---------|---------|----------------|
-| ResNet3D-50 | *en cours* | *en cours* | *en cours* | 0.9427 |
+| ResNet3D-50 | 0.7967 | 0.7567 | **0.9009** | 0.9427 |
 | ResNet3D-101 | *en cours* | *en cours* | *en cours* | 0.9515 |
 | DenseNet3D-121 | *en cours* | *en cours* | *en cours* | 0.9528 |
 
