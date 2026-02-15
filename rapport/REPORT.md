@@ -25,11 +25,12 @@ La metrique utilisee pour comparer les modeles est le **val_f1_mean**, defini co
 
 Cette metrique donne un poids egal aux deux classes, meme si le dataset est legerement desequilibre. Le meilleur modele est retenu sur la base du **best val_f1_mean** observe pendant l'entrainement (early stopping).
 
-### 0.3 Demarche en 3 phases
+### 0.3 Demarche en 4 phases
 
 1. **Phase 1 -- Evaluation du preprocessing** : fixer la strategie de preparation des donnees en comparant 9 configurations sur ResNet3D-50.
 2. **Phase 2 -- Comparaison d'architectures** : evaluer 9 modeles (CNN et Transformers) sur les 2 meilleurs preprocessings.
-3. **Phase 3 -- Cross-validation et test holdout** : valider les meilleurs modeles par 5-fold CV stratifiee, puis test sur un holdout jamais vu.
+3. **Phase 3 -- Etude de l'impact des canaux d'entree** : evaluer la contribution individuelle de chaque canal en comparant les performances single-channel vs 3-canaux.
+4. **Phase 4 -- Cross-validation et test holdout** : valider les meilleurs modeles par 5-fold CV stratifiee, puis test sur un holdout jamais vu.
 
 ---
 
@@ -60,7 +61,7 @@ La sortie est un fichier JSON listant les identifiants de stacks pour chaque ens
 
 Pour la comparaison des preprocessings et des architectures, un **split unique train/test (80/20)** est utilise. Plusieurs seeds ont ete testees pour evaluer la robustesse des resultats sur differents splits.
 
-### Split cross-validation (Phase 3)
+### Split cross-validation (Phase 4)
 
 Pour la validation rigoureuse des modeles, un schema de **cross-validation stratifiee a 5 folds** avec holdout test est utilise :
 
@@ -195,33 +196,33 @@ Les patches sont initialement sauvegardes au format `.nii.gz`, puis convertis en
 
 #### Preprocess intensity_global -- CNN
 
-| Modele | Best val_f1_mean | Optimizer | Preprocess | Note |
-|--------|-----------------|-----------|------------|------|
-| SEResNet3D-50 | **0.9602** | Adam | intensity_global | |
-| SEResNet3D-101 | 0.9548 | Adam | intensity_global | |
-| DenseNet3D-121 | 0.9528 | Adam | intensity_global | 11.3M params, meilleur ratio perf/taille |
-| ResNet3D-101 | 0.9515 | Adam | intensity_global | |
-| ResNet3D-50 | 0.9427 | Adam | intensity_global | |
+| Modele | Best val_f1_mean | Epochs | Temps | Optimizer | Preprocess |
+|--------|-----------------|--------|-------|-----------|------------|
+| SEResNet3D-50 | **0.9602** | 100 (no ES) | 3h59 | Adam | intensity_global |
+| SEResNet3D-101 | 0.9548 | 85 (ES) | 3h54 | Adam | intensity_global |
+| DenseNet3D-121 | 0.9528 | 72 (ES) | 3h24 | Adam | intensity_global |
+| ResNet3D-101 | 0.9515 | 74 (ES) | 3h17 | Adam | intensity_global |
+| ResNet3D-50 | 0.9427 | 55 (ES) | 2h10 | Adam | intensity_global |
 
 #### Preprocess minmax_p1p99 -- CNN
 
-| Modele | Best val_f1_mean | Optimizer | Preprocess | Note |
-|--------|-----------------|-----------|------------|------|
-| SEResNet3D-101 | 0.9395 | Adam | minmax_p1p99 | |
-| SEResNet3D-50 | 0.9393 | Adam | minmax_p1p99 | |
-| ResNet3D-101 | 0.9284 | Adam | minmax_p1p99 | |
-| ResNet3D-50 | 0.9202 | Adam | minmax_p1p99 | |
+| Modele | Best val_f1_mean | Epochs | Temps | Optimizer | Preprocess |
+|--------|-----------------|--------|-------|-----------|------------|
+| SEResNet3D-101 | 0.9395 | 69 (ES) | 3h12 | Adam | minmax_p1p99 |
+| SEResNet3D-50 | 0.9393 | 79 (ES) | 3h09 | Adam | minmax_p1p99 |
+| ResNet3D-101 | 0.9284 | 100 (no ES) | 4h24 | Adam | minmax_p1p99 |
+| ResNet3D-50 | 0.9202 | 50 (ES) | 1h57 | Adam | minmax_p1p99 |
 
 > **Observation** : intensity_global surpasse systematiquement minmax_p1p99 pour les 4 modeles CNN testes sur les deux preprocess (+2 a +3 points F1), confirmant les resultats de la Phase 1.
 
 #### Preprocess intensity_global -- Transformers (Adam, lr=0.001)
 
-| Modele | Best val_f1_mean | Optimizer | Note |
-|--------|-----------------|-----------|------|
-| ConvNeXt3D-Large | 0.9485 | Adam | Seul transformer a converger |
-| Swin3D-Tiny | 0.3571 | Adam | **Bloque** -- preds constantes |
-| Swin3D-Small | 0.3571 | Adam | **Bloque** -- preds constantes |
-| ViT3D-Base | 0.3571 | Adam | **Bloque** -- preds constantes |
+| Modele | Best val_f1_mean | Epochs | Temps | Optimizer | Note |
+|--------|-----------------|--------|-------|-----------|------|
+| ConvNeXt3D-Large | 0.9485 | 52 (ES) | 18h07 | Adam | Seul transformer a converger |
+| Swin3D-Tiny | 0.3571 | 21 (ES) | 2h31 | Adam | **Bloque** -- preds constantes |
+| Swin3D-Small | 0.3571 | 21 (ES) | 4h21 | Adam | **Bloque** -- preds constantes |
+| ViT3D-Base | 0.3571 | 22 (ES) | 3h25 | Adam | **Bloque** -- preds constantes |
 
 > **Diagnostic** : les transformers (sauf ConvNeXt) se sont bloques a F1=0.357 avec une loss ~0.7 plate.
 > Le mecanisme d'attention est sensible aux learning rates eleves.
@@ -231,26 +232,27 @@ Les patches sont initialement sauvegardes au format `.nii.gz`, puis convertis en
 
 Correction appliquee : `AdamW` (weight_decay=0.05), `lr=0.0001`, warmup 5 epochs, cosine scheduler, gradient clipping 1.0.
 
-| Modele | Best val_f1_mean | Optimizer | Note |
-|--------|-----------------|-----------|------|
-| ViT3D-Base | 0.9167 | AdamW | Deblocage reussi |
-| Swin3D-Tiny | 0.8913 | AdamW | Deblocage reussi |
-| Swin3D-Small | 0.8772 | AdamW | Deblocage reussi |
-| ConvNeXt3D-Large | *en cours* | AdamW | |
+| Modele | Best val_f1_mean | Epochs | Temps | Optimizer | Note |
+|--------|-----------------|--------|-------|-----------|------|
+| ConvNeXt3D-Large | **0.9606** | 100 (no ES) | ~37h | AdamW | Resume termine |
+| ViT3D-Base | 0.9167 | 70 (ES) | 10h45 | AdamW | Deblocage reussi |
+| Swin3D-Tiny | 0.8913 | 69 (ES) | 8h12 | AdamW | Deblocage reussi |
+| Swin3D-Small | 0.8772 | 93 (ES) | 19h00 | AdamW | Deblocage reussi |
 
 ### 3.4 Synthese comparative (meilleur resultat par modele)
 
-| Rang | Modele | val_f1_mean | Optimizer | Preprocess | Params |
-|------|--------|------------|-----------|------------|--------|
-| 1 | SEResNet3D-50 | **0.9602** | Adam | intensity_global | 48.7M |
-| 2 | SEResNet3D-101 | 0.9548 | Adam | intensity_global | 90.0M |
-| 3 | DenseNet3D-121 | 0.9528 | Adam | intensity_global | 11.3M |
-| 4 | ResNet3D-101 | 0.9515 | Adam | intensity_global | 85.2M |
-| 5 | ConvNeXt3D-Large | 0.9485 | Adam | intensity_global | 210M |
-| 6 | ResNet3D-50 | 0.9427 | Adam | intensity_global | 46.2M |
-| 7 | ViT3D-Base | 0.9167 | AdamW | intensity_global | 89.0M |
-| 8 | Swin3D-Tiny | 0.8913 | AdamW | intensity_global | 9.8M |
-| 9 | Swin3D-Small | 0.8772 | AdamW | intensity_global | 38.7M |
+| Rang | Modele | val_f1_mean | Epochs | Temps | Optimizer | Params |
+|------|--------|------------|--------|-------|-----------|--------|
+| 1 | SEResNet3D-50 | **0.9602** | 100 | 3h59 | Adam | 48.7M |
+| 2 | ConvNeXt3D-Large | 0.9606 | 100 | ~37h | AdamW | 210M |
+| 3 | SEResNet3D-101 | 0.9548 | 85 | 3h54 | Adam | 90.0M |
+| 4 | DenseNet3D-121 | 0.9528 | 72 | 3h24 | Adam | 11.3M |
+| 5 | ResNet3D-101 | 0.9515 | 74 | 3h17 | Adam | 85.2M |
+| 6 | ConvNeXt3D-Large | 0.9485 | - | - | Adam | 210M |
+| 7 | ResNet3D-50 | 0.9427 | 55 | 2h10 | Adam | 46.2M |
+| 8 | ViT3D-Base | 0.9167 | 70 | 10h45 | AdamW | 89.0M |
+| 9 | Swin3D-Tiny | 0.8913 | 69 | 8h12 | AdamW | 9.8M |
+| 10 | Swin3D-Small | 0.8772 | 93 | 19h00 | AdamW | 38.7M |
 
 > **Observation** : SEResNet3D-50 obtient le meilleur F1 global (0.9602) sur intensity_global.
 > DenseNet3D-121 offre le meilleur ratio perf/taille (0.9528 avec seulement 11.3M params).
@@ -259,9 +261,50 @@ Correction appliquee : `AdamW` (weight_decay=0.05), `lr=0.0001`, warmup 5 epochs
 
 ---
 
-## 4. Cross-validation (5-fold)
+## 4. Etude single-channel
 
-### 4.1 Protocole
+### 4.1 Motivation
+
+Dans la section 3, tous les modeles recoivent des patches a **3 canaux identiques** : le volume grayscale original est replique 3 fois pour former une entree `(3, 32, 256, 256)`, par compatibilite avec les architectures conçues pour du RGB.
+
+Cette approche souleve une question : **l'information utile est-elle repartie differemment selon les canaux du preprocessing, et un seul canal suffit-il a atteindre des performances comparables ?**
+
+L'objectif de cette etude est de :
+- Evaluer la performance de chaque canal individuellement
+- Determiner si un canal porte plus d'information discriminante que les autres
+- Comparer les resultats single-channel aux resultats 3-canaux de reference
+
+**Choix des modeles :** les architectures SEResNet sont volontairement exclues de cette etude. Le mecanisme Squeeze-and-Excitation repose precisement sur une **ponderation adaptative inter-canaux** : il apprend a recalibrer l'importance relative de chaque canal de features. Avec un seul canal en entree, ce mecanisme perd son interet et ne peut pas s'exprimer, ce qui fausserait la comparaison. Les 3 modeles retenus (ResNet3D-50, ResNet3D-101, DenseNet3D-121) n'ont pas de dependance architecturale au nombre de canaux.
+
+### 4.2 Protocole
+
+- **Entree** : les patches preprocesses ont une dimension `(3, 32, 256, 256)`. On selectionne un **unique canal** (canal 1, 2 ou 3) pour obtenir un tenseur `(1, 32, 256, 256)` passe au modele.
+- **Modeles retenus** : ResNet3D-50, ResNet3D-101, DenseNet3D-121
+- **Variantes** : 3 par modele (ch1, ch2, ch3), soit **9 runs** au total
+- **Batch size** : double par rapport aux runs 3-canaux (ResNet3D-50 : 64, ResNet3D-101 : 48, DenseNet3D-121 : 32) grace a la reduction de memoire GPU
+- **Preprocess** : intensity_global (identique aux runs principaux)
+- **Split** : meme split train/val que les runs single-split de la section 3
+- **Entrainement** : parametres identiques aux CNN de la section 3 (Adam, lr=0.001, 100 epochs max, early stopping patience 20)
+
+### 4.3 Resultats
+
+| Modele | Canal 1 | Canal 2 | Canal 3 | 3 canaux (ref) |
+|--------|---------|---------|---------|----------------|
+| ResNet3D-50 | *en cours* | *en cours* | *en cours* | 0.9427 |
+| ResNet3D-101 | *en cours* | *en cours* | *en cours* | 0.9515 |
+| DenseNet3D-121 | *en cours* | *en cours* | *en cours* | 0.9528 |
+
+> La colonne "3 canaux (ref)" reprend les meilleurs resultats de la section 3.3 (intensity_global, CNN) pour comparaison directe.
+
+### 4.4 Analyse
+
+*A completer apres les resultats des 9 runs.*
+
+---
+
+## 5. Cross-validation (5-fold)
+
+### 5.1 Protocole
 
 - **10% holdout test** : 94 stacks reserves, jamais utilises pendant l'entrainement
 - **90% restants** : 643 stacks repartis en 5 folds stratifies (age, sexe, region, etc.)
@@ -269,43 +312,43 @@ Correction appliquee : `AdamW` (weight_decay=0.05), `lr=0.0001`, warmup 5 epochs
 - Preprocess : **intensity_global**
 - Tous les modeles entraines avec **Adam, lr=0.001, batch_size variable**
 
-### 4.2 Resultats -- ResNet3D-50
+### 5.2 Resultats -- ResNet3D-50
 
-| Fold | val_f1_mean |
-|------|------------|
-| 0 | 0.9579 |
-| 1 | **0.9647** |
-| 2 | 0.9498 |
-| 3 | 0.9633 |
-| 4 | 0.8955 |
-| **Moyenne** | **0.9462** |
-| Ecart-type | 0.0273 |
+| Fold | val_f1_mean | Epochs | Temps |
+|------|------------|--------|-------|
+| 0 | 0.9579 | 55 (ES) | 1h56 |
+| 1 | **0.9647** | 58 (ES) | 2h02 |
+| 2 | 0.9498 | 41 (ES) | 1h24 |
+| 3 | 0.9633 | 52 (ES) | 1h43 |
+| 4 | 0.8955 | 43 (ES) | 1h25 |
+| **Moyenne** | **0.9462** | ~50 | ~1h42 |
+| Ecart-type | 0.0273 | | |
 
-### 4.3 Resultats -- SEResNet3D-50
+### 5.3 Resultats -- SEResNet3D-50
 
-| Fold | val_f1_mean |
-|------|------------|
-| 0 | 0.9526 |
-| 1 | **0.9581** |
-| 2 | 0.9313 |
-| 3 | 0.9561 |
-| 4 | 0.9265 |
-| **Moyenne** | **0.9449** |
-| Ecart-type | 0.0143 |
+| Fold | val_f1_mean | Epochs | Temps |
+|------|------------|--------|-------|
+| 0 | 0.9526 | 42 (ES) | 1h37 |
+| 1 | **0.9581** | 51 (ES) | 1h55 |
+| 2 | 0.9313 | 46 (ES) | 1h44 |
+| 3 | 0.9561 | 31 (ES) | 1h07 |
+| 4 | 0.9265 | 60 (ES) | 2h04 |
+| **Moyenne** | **0.9449** | ~46 | ~1h41 |
+| Ecart-type | 0.0143 | | |
 
-### 4.4 Resultats -- ResNet3D-101
+### 5.4 Resultats -- ResNet3D-101
 
-| Fold | val_f1_mean |
-|------|------------|
-| 0 | 0.9483 |
-| 1 | 0.9683 |
-| 2 | 0.9430 |
-| 3 | **0.9791** |
-| 4 | 0.8953 |
-| **Moyenne** | **0.9468** |
-| Ecart-type | 0.0289 |
+| Fold | val_f1_mean | Epochs | Temps |
+|------|------------|--------|-------|
+| 0 | 0.9483 | 46 (ES) | 1h43 |
+| 1 | 0.9683 | 52 (ES) | 1h57 |
+| 2 | 0.9430 | 51 (ES) | 1h56 |
+| 3 | **0.9791** | 76 (ES) | 2h44 |
+| 4 | 0.8953 | 34 (ES) | 1h19 |
+| **Moyenne** | **0.9468** | ~52 | ~1h56 |
+| Ecart-type | 0.0289 | | |
 
-### 4.5 Resultats -- SEResNet3D-101
+### 5.5 Resultats -- SEResNet3D-101
 
 | Fold | val_f1_mean |
 |------|------------|
@@ -317,27 +360,27 @@ Correction appliquee : `AdamW` (weight_decay=0.05), `lr=0.0001`, warmup 5 epochs
 | **Moyenne** | **0.9450** |
 | Ecart-type | 0.0205 |
 
-### 4.6 Resultats -- DenseNet3D-121
+### 5.6 Resultats -- DenseNet3D-121
 
-| Fold | val_f1_mean |
-|------|------------|
-| 0 | 0.9639 |
-| 1 | 0.9616 |
-| 2 | 0.9529 |
-| 3 | **0.9668** |
-| 4 | 0.9162 |
-| **Moyenne** | **0.9523** |
-| Ecart-type | 0.0186 |
+| Fold | val_f1_mean | Epochs | Temps |
+|------|------------|--------|-------|
+| 0 | 0.9639 | 51 (ES) | 2h05 |
+| 1 | 0.9616 | 52 (ES) | 2h01 |
+| 2 | 0.9529 | 49 (ES) | 1h54 |
+| 3 | **0.9668** | 48 (ES) | 1h57 |
+| 4 | 0.9162 | 46 (ES) | 1h53 |
+| **Moyenne** | **0.9523** | ~49 | ~1h58 |
+| Ecart-type | 0.0186 | | |
 
-### 4.7 Comparaison (5 modeles, 5 folds chacun)
+### 5.7 Comparaison (5 modeles, 5 folds chacun)
 
-| Rang | Modele | F1 mean (moy. 5 folds) | Ecart-type | Meilleur fold | Pire fold |
-|------|--------|------------------------|------------|---------------|-----------|
-| 1 | DenseNet3D-121 | **0.9523** | 0.0186 | Fold 3 (0.9668) | Fold 4 (0.9162) |
-| 2 | ResNet3D-101 | 0.9468 | 0.0289 | Fold 3 (0.9791) | Fold 4 (0.8953) |
-| 3 | ResNet3D-50 | 0.9462 | 0.0273 | Fold 1 (0.9647) | Fold 4 (0.8955) |
-| 4 | SEResNet3D-101 | 0.9450 | 0.0205 | Fold 3 (0.9622) | Fold 4 (0.9078) |
-| 5 | SEResNet3D-50 | 0.9449 | 0.0143 | Fold 1 (0.9581) | Fold 4 (0.9265) |
+| Rang | Modele | F1 mean (moy. 5 folds) | Ecart-type | Meilleur fold | Pire fold | Epochs moy. | Temps moy./fold | Temps total |
+|------|--------|------------------------|------------|---------------|-----------|-------------|----------------|-------------|
+| 1 | DenseNet3D-121 | **0.9523** | 0.0186 | Fold 3 (0.9668) | Fold 4 (0.9162) | ~49 | ~1h58 | ~9h49 |
+| 2 | ResNet3D-101 | 0.9468 | 0.0289 | Fold 3 (0.9791) | Fold 4 (0.8953) | ~52 | ~1h56 | ~9h40 |
+| 3 | ResNet3D-50 | 0.9462 | 0.0273 | Fold 1 (0.9647) | Fold 4 (0.8955) | ~50 | ~1h42 | ~8h31 |
+| 4 | SEResNet3D-101 | 0.9450 | 0.0205 | Fold 3 (0.9622) | Fold 4 (0.9078) | ~68 | ~2h48 | ~14h02 |
+| 5 | SEResNet3D-50 | 0.9449 | 0.0143 | Fold 1 (0.9581) | Fold 4 (0.9265) | ~46 | ~1h41 | ~8h27 |
 
 > **Observations :**
 > - **DenseNet3D-121** arrive en tete de la CV (0.9523) avec seulement 11.3M params -- meilleur ratio perf/taille et meilleure generalisation.
@@ -348,13 +391,23 @@ Correction appliquee : `AdamW` (weight_decay=0.05), `lr=0.0001`, warmup 5 epochs
 
 ---
 
-## 5. Test sur holdout (94 stacks)
+## 6. Test sur holdout (94 stacks)
 
-### 5.1 Protocole
+### 6.1 Protocole
 
-Le pipeline de test charge les **5 checkpoints** (1 par fold) d'un modele, fait l'inference sur les **94 stacks holdout** (1459 patches), agrege les scores par stack (moyenne des probabilites des patches), **ensemble les 5 modeles** (moyenne des probabilites), et produit des metriques detaillees.
+Le pipeline de test utilise les **5 checkpoints** issus de la cross-validation (1 par fold) pour evaluer un modele sur les **94 stacks holdout** (1459 patches au total).
 
-### 5.2 Resultats -- Ensemble (5 modeles)
+**Etape 1 -- Inference par patch :** chaque patch est passe individuellement dans chacun des 5 modeles. Chaque modele produit un logit, transforme en probabilite via sigmoide. On obtient donc, pour chaque patch, **5 probabilites** (une par fold).
+
+**Etape 2 -- Ensemble des modeles :** pour chaque patch, les 5 probabilites sont moyennees pour produire une **probabilite ensemble** unique par patch.
+
+**Etape 3 -- Agregation par stack :** tous les patches appartenant a un meme stack sont regroupes. La probabilite finale du stack est la **moyenne arithmetique** des probabilites ensemble de ses patches. Par exemple, un stack avec 16 patches aura sa probabilite calculee comme `p_stack = mean(p_patch_1, p_patch_2, ..., p_patch_16)`.
+
+**Etape 4 -- Decision :** un seuil fixe a **0.5** est applique sur la probabilite du stack. Si `p_stack >= 0.5`, le stack est predit MALADE, sinon SAIN.
+
+**Metriques :** F1 mean (moyenne du F1 SAIN et F1 MALADE), Accuracy, AUC (aire sous la courbe ROC, calculee sur les probabilites continues avant seuillage), et matrice de confusion.
+
+### 6.2 Resultats -- Ensemble (5 modeles)
 
 | Rang | Modele | F1 mean | Accuracy | AUC | Erreurs (sur 94) |
 |------|--------|---------|----------|-----|------------------|
@@ -367,10 +420,9 @@ Le pipeline de test charge les **5 checkpoints** (1 par fold) d'un modele, fait 
 > **Observations :**
 > - **ResNet3D-101** et **DenseNet3D-121** partagent la 1ere place avec F1=0.9785 et seulement 2 erreurs (faux positifs).
 > - **SEResNet3D-101** obtient le meilleur **AUC** (0.9964), signe de la meilleure calibration des probabilites.
-> - Les 5 modeles depassent **96.7% F1** sur des donnees jamais vues -- generalisation tres solide.
 > - DenseNet3D-121 egalise ResNet3D-101 avec **18x moins de parametres** (11.3M vs 85.2M).
 
-### 5.3 Confusion matrices
+### 6.3 Confusion matrices
 
 **ResNet3D-101 / DenseNet3D-121 (identiques) :**
 
@@ -393,7 +445,7 @@ Le pipeline de test charge les **5 checkpoints** (1 par fold) d'un modele, fait 
 | **Vrai SAIN** | 40 | 3 |
 | **Vrai MALADE** | 0 | 51 |
 
-### 5.4 Stacks problematiques
+### 6.4 Stacks problematiques
 
 Certains stacks sont systematiquement mal classes par tous les modeles :
 
@@ -401,13 +453,9 @@ Certains stacks sont systematiquement mal classes par tous les modeles :
 |-------|-----------|-------------|
 | **stack_000754** | SAIN | Predit MALADE par les 5 modeles (proba 0.92--0.97). Faux positif recurrent. |
 | **stack_000708** | SAIN | Predit MALADE par 4/5 modeles (proba 0.69--0.84). Faux positif limite. |
-| **stack_000763** | MALADE | Predit SAIN par 2/5 modeles (proba 0.35--0.62). Cas difficile a la frontiere. |
 
 > Ces stacks meritent une inspection visuelle pour verifier la qualite des annotations ou detecter des artefacts.
 
-### 5.5 TODO
+### 6.5 TODO
 
-- [ ] Completer ConvNeXt3D-Large (AdamW single-split, en cours)
 - [ ] CV + holdout pour ConvNeXt3D-Large et ViT3D-Base (en cours)
-- [ ] Analyser visuellement les stacks problematiques (754, 708, 763)
-- [ ] Envisager un seuil optimise (au lieu de 0.5) base sur les courbes ROC
