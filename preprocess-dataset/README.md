@@ -1,108 +1,149 @@
-# Preprocessing Scripts Structure
+# preprocess-dataset
 
-## Organisation
+**Step 1 of the pipeline.** Converts raw NIfTI volumes into fixed-size 3D patches ready for training.
 
-Config under `scripts/config/`, entrypoint and pipeline under `scripts/`:
+## Purpose
 
-```
-scripts/
-├── config/                      # YAML configs (v1.1 … v1.6)
-├── preprocess_volumes_nii.py    # Preprocessing → patches (--check = run validation at the end)
-│
-└── preprocessing/               # Preprocessing by feature
-    ├── config/   load_context, get_output_dirs
-    ├── io/       load_volume, save_patch_nii (NIfTI)
-    ├── normalize/ normalize_patch
-    ├── patches/  slice_selection, score_map, extraction, positioning, utils
-    ├── results/  metadata, write_run_results, display
-    ├── run/      load_valid_stacks, process_single_volume, process_all_volumes
-    └── check/    run_validation, run_post_check (count, empty, norm, dim)
-```
+Takes the raw 3D NIfTI volumes (~1042×1042×50-200 voxels, 3 channels) and extracts normalized 3D patches of a fixed target size (256×256×32 by default). Each patch is saved as a `.npy` file alongside a JSON index (`patches_info.json`) mapping each patch to its source stack and label.
 
-**Voxel intensity analysis** lives in a separate project: see the sibling folder **voxel-analytics**.
+**Active configuration (v1.9):** `top_n=4` patches per volume using intensity-based slice selection and `minmax_p1p99` normalization → **3084 patches from 771 volumes**.
+
+## When to use it
+
+Run after `refacto-dataset` (or `voxel-analytics` for normalization guidance) and before `split-dataset`.
+
+**Prerequisites:** enriched dataset JSON (`_dataset-json/dataset_final.json`) + NIfTI data root directory.
 
 ## Usage
 
-### Preprocessing
-
 ```bash
-python scripts/preprocess_volumes_nii.py --config scripts/config/preprocess_config_v1.1.yaml --workers 16
+# Standard run
+python scripts/preprocess_volumes_nii.py \
+    --config config/preprocess_config_v1.9.yaml \
+    --workers 16
+
+# Run preprocessing then validate outputs
+python scripts/preprocess_volumes_nii.py \
+    --config config/preprocess_config_v1.9.yaml \
+    --workers 16 \
+    --check
 ```
 
-**Patch extraction configuration**
+The `--check` flag runs a full validation pass after preprocessing (counts, empty file check, normalization range, patch dimensions).
 
-Two extraction modes:
+## Configuration
 
-1. **Mode `max`**: Extract as many non-overlapping patches as fit in a regular 3D grid.
-   - Number of patches is derived from volume and patch sizes.
-   - Example: volume 1042×1042×D, patches 256×256×32 → 4×4 grid in H,W and D/32 in depth.
+Config files live in `config/` at the module root. Use `preprocess_config_v1.9.yaml` (latest and recommended).
 
-2. **Mode `top_n`**: Extract the N best patches by a 3D score (max-pool over the volume).
-   - Picks the most interesting regions (intensity, variance, entropy, gradient).
-   - Fixed number of patches, minimum spacing to avoid overlap.
-   - Example: `n_patches: 16, scoring_method: "intensity"` → 16 patches at highest-intensity 3D positions.
+Key parameters:
 
-**Important:** Patches use exact size `target_h × target_w × target_d`. If the volume is not a multiple of patch size, edge pixels are unused. The pipeline errors if the requested number of patches exceeds the theoretical maximum.
+```yaml
+preprocessing:
+  target_height: 256        # patch spatial height
+  target_width: 256         # patch spatial width
+  target_depth: 32          # patch depth (number of slices)
+  output_format: npy        # npy (faster I/O for training) or nii.gz
 
-### Voxel intensity analysis
+  patch_extraction:
+    mode: top_n             # top_n (recommended) or max (full grid)
+    n_patches: 4            # number of patches to extract per volume (top_n mode)
+    pool_stride: 2          # stride for the 3D score map max-pooling
 
-**Separate project**: sibling folder **voxel-analytics** (not part of preprocess-dataset).
+  slice_selection:
+    method: intensity       # intensity | variance | entropy | gradient | intensity_range
 
-```bash
-cd ../voxel-analytics
-python run.py --dataset-json /path/to/dataset.json --data-root /path/to/data --output-dir ./output
-python run.py --from-json ./output/voxel_intensity_analysis.json --output-dir ./output
+  normalization:
+    method: minmax_p1p99    # z_score | min_max | minmax_p1p99 | minmax_p5p95
 ```
 
-See `voxel-analytics/README.md` for options and outputs.
+### Patch extraction modes
 
-## Modules
+**`top_n`** (recommended): extract the N highest-scoring patches from the volume using a 3D score map. Patches are spaced to avoid overlap. Use this when you want a fixed, controllable number of patches per volume.
 
-### Preprocessing core
+**`max`**: extract all non-overlapping patches that fit in a regular 3D grid. The number of patches depends on the volume dimensions. A 1042×1042×D volume at 256×256×32 yields a 4×4×(D/32) grid.
 
-- **`io/nii.py`**: NIfTI I/O
-  - `load_volume()`: load a .nii.gz volume
-  - `save_patch_nii()`: save a patch as .nii.gz
+### Normalization methods
 
-- **`patches/extraction.py`**: 3D patch extraction
-  - `extract_patches_max()`: regular grid, no overlap
-  - `extract_patches_top_n()`: N best patches from 3D score grid
+| Method | Description |
+|---|---|
+| `z_score` | Per-patch zero mean / unit variance |
+| `min_max` | Per-patch [0, 1] scaling using global min/max |
+| `minmax_p1p99` | Per-stack [0, 1] scaling using p1/p99 percentiles (clips outliers) |
+| `minmax_p5p95` | Per-stack [0, 1] scaling using p5/p95 percentiles |
 
-- **`patches/positioning.py`**: 3D position selection
-  - `find_best_patch_positions_3d()`: best 3D centres from score grid (used by `top_n`)
+Per-stack percentile statistics are precomputed and stored in `data/stack_p1p99.json` and `data/stack_p5p95.json`.
 
-- **`patches/score_map.py`**: 3D score volume for `top_n`
-  - `compute_score_volume_3d()`: max-pool 3D over (H,W,D,C) → grid for position selection
+## Outputs
 
-- **`patches/utils.py`**: patch helpers
-  - `resize_patch()`: resize spatial dimensions
+```
+<output_dir>/
+├── patches/
+│   ├── stack_000001_patch_0.npy
+│   ├── stack_000001_patch_1.npy
+│   └── ...
+└── patches_info.json    # [{stack_id, label, filename, patch_index, score}, ...]
+```
 
-- **`patches/slice_selection.py`**: slice block choice (for `max` mode)
-  - `select_best_slices()`: pick best contiguous block of D slices (intensity, variance, entropy, gradient, intensity_range)
+The `patches_info.json` format is the contract consumed by `split-dataset` and `gpu-lightning`.
 
-- **`normalize/normalize.py`**: normalization
-  - `normalize_patch()`: normalize a patch (z-score, min-max, etc.)
+## Structure
 
-### Preprocessing helpers
+```
+preprocess-dataset/
+├── config/
+│   ├── preprocess_config.yaml          # Base template (v0)
+│   ├── preprocess_config_v1.1.yaml     # First versioned config
+│   └── ...
+│   └── preprocess_config_v1.9.yaml     # Current recommended config
+├── data/
+│   ├── global_intensity.json           # Per-channel global min/max across all volumes
+│   ├── stack_p1p99.json                # Per-stack, per-channel p1/p99 percentiles
+│   └── stack_p5p95.json                # Per-stack, per-channel p5/p95 percentiles
+├── logs/                               # Execution logs per config version
+└── scripts/
+    ├── preprocess_volumes_nii.py       # Main entrypoint
+    ├── config/
+    │   └── loader.py                   # YAML config loading, path resolution, validation
+    ├── io/
+    │   └── nii.py                      # NIfTI I/O (load_volume, save_patch_nii)
+    ├── normalize/
+    │   └── normalize.py                # normalize_patch() — all normalization methods
+    ├── patches/
+    │   ├── extraction.py               # extract_patches_max(), extract_patches_top_n()
+    │   ├── positioning.py              # find_best_patch_positions_3d() — score-based centre selection
+    │   ├── score_map.py                # compute_score_volume_3d() — 3D max-pool score grid
+    │   ├── slice_selection.py          # select_best_slices() — contiguous depth block selection
+    │   └── utils.py                    # resize_patch()
+    ├── results/
+    │   ├── write.py                    # Write patches_info.json and metadata
+    │   ├── metadata.py                 # Run metadata helpers
+    │   └── display.py                  # Print run summary
+    ├── run/
+    │   ├── stacks.py                   # load_valid_stacks() — filter dataset JSON to valid entries
+    │   ├── volume.py                   # process_single_volume() — full per-volume pipeline
+    │   └── pipeline.py                 # process_all_volumes() — parallel batch processing
+    ├── check/
+    │   ├── validate.py                 # run_validation(), run_post_check() — count, dim, norm checks
+    │   ├── sample_checks.py            # Per-patch sanity checks
+    │   ├── loader.py                   # Load patches for validation
+    │   └── counts.py                   # Expected vs actual patch count checks
+    └── stats/
+        ├── compute.py                  # Compute global intensity stats and percentiles
+        ├── ensure.py                   # Ensure stats files exist before preprocessing
+        ├── io.py                       # Load/save stats JSON files
+        ├── paths.py                    # Stats file path resolution
+        ├── workers.py                  # Parallel stats computation
+        └── constants.py               # Default histogram bins and percentile thresholds
+```
 
-- **`config/loader.py`**: config loading and resolution
-  - `load_context()`: load and validate YAML, resolve paths
-  - `get_output_dirs()`: output_base, patches_output
-  - `get_slice_selection_method()`, `get_patch_extraction_config()`: slice and patch settings
+## 3D pipeline execution order
 
-- **`run/stacks.py`**: dataset loading
-  - `load_valid_stacks()`: load JSON, filter valid stacks (SAIN/MALADE, existing nii_path)
+For each volume:
 
-- **`run/volume.py`**: single-volume pipeline
-  - `process_single_volume()`: load → normalize → extract patches → save
-
-- **`run/pipeline.py`**: batch
-  - `process_all_volumes()`: parallel run over all volumes
-
-- **`results/write.py`**, **`results/display.py`**: write metadata, print run summary
-
-- **`check/validate.py`**: patch validation
-  - `run_validation()`: count, empty files, norm/dim checks
-  - `run_post_check()`: run validation, print, exit(1) on failure (used by `--check`)
-
-See **PIPELINE.md** for the full 3D pipeline and execution order.
+1. Load NIfTI → `(H, W, D, C)` float32 array
+2. Select best depth slice block (`slice_selection`)
+3. Compute 3D score map over the cropped volume (`score_map`)
+4. Select top-N patch positions (`positioning`)
+5. Extract patches at selected positions (`extraction`)
+6. Normalize each patch (`normalize`)
+7. Save patches as `.npy` files + append to `patches_info.json`
